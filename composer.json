@@ -1,5 +1,5 @@
 {
-    "name": "royvoetman/flysystem-gitlab",
+    "name": "royvoetman/flysystem-gitlab-storage",
     "description": "Flysystem Adapter for the Gitlab Repository files API v4",
     "keywords": [
         "royvoetman",
