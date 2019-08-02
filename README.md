@@ -2,7 +2,7 @@
 
 A Gitlab Storage filesystem for [Flysystem](https://flysystem.thephpleague.com/docs/).
 
-[![Latest Version](https://img.shields.io/github/release/RoyVoetman/Flysystem-Gitlab-storage.svg?style=flat-square)](https://github.com/RoyVoetman/Flysystem-Gitlab-storage/releases)
+[![Latest Version](https://img.shields.io/packagist/v/royvoetman/Flysystem-Gitlab-storage.svg?style=flat-square)](https://packagist.org/packages/royvoetman/Flysystem-Gitlab-storage)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 [![Total Downloads](https://img.shields.io/packagist/dt/royvoetman/flysystem-gitlab-storage.svg?style=flat-square)](https://packagist.org/packages/royvoetman/flysystem-gitlab-storage)
 
@@ -56,7 +56,7 @@ $filesystem->deleteDir('path/to/directory');
 // see http://flysystem.thephpleague.com/api/ for full list of available functionality
 ```
 
-### Access token
+### Access token (required for private projects)
 Gitlab supports server side API authentication with Personal Access tokens
 
 For more information on how to create your own Personal Access token: [Gitlab Docs](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
