@@ -1,0 +1,51 @@
+{
+    "name": "royvoetman/flysystem-gitlab",
+    "description": "Flysystem Adapter for the Gitlab Repository files API v4",
+    "keywords": [
+        "royvoetman",
+        "flysystem-gitlab",
+        "flysystem",
+        "gitlab",
+        "v4",
+        "api",
+        "laravel-storage"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Roy Voetman",
+            "email": "royvoetman@outlook.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.0",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6.3",
+        "league/flysystem": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "RoyVoetman\\FlysystemGitlab\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RoyVoetman\\FlysystemGitlab\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "RoyVoetman\\FlysystemGitlab\\Providers\\GitlabServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
