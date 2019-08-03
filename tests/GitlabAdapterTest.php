@@ -191,9 +191,11 @@ class GitlabAdapterTest extends TestCase
     public function it_can_rename_a_file()
     {
         $res = $this->gitlabAdapter->rename('testing.md', 'testing_renamed.md');
-        $contents = $this->gitlabAdapter->read('testing_renamed.md');
         
-        $this->assertStringStartsWith('# Testing update', $contents);
+        $this->assertTrue($res);
+    
+        $res = $this->gitlabAdapter->has('testing_renamed.md');
+    
         $this->assertTrue($res);
     }
     
@@ -217,9 +219,11 @@ class GitlabAdapterTest extends TestCase
     public function it_can_copy_a_file()
     {
         $res = $this->gitlabAdapter->copy('testing_renamed.md', 'testing.md');
-        $contents = $this->gitlabAdapter->read('testing.md');
         
-        $this->assertStringStartsWith('# Testing update', $contents);
+        $this->assertTrue($res);
+    
+        $res = $this->gitlabAdapter->has('testing.md');
+    
         $this->assertTrue($res);
     }
     
@@ -352,9 +356,9 @@ class GitlabAdapterTest extends TestCase
      */
     public function it_can_read_a_file()
     {
-        $contents = $this->gitlabAdapter->read('README.md');
+        $res = $this->gitlabAdapter->read('README.md');
         
-        $this->assertStringStartsWith('# Testing repo for `flysystem-gitlab` project', $contents);
+        $this->assertStringStartsWith('# Testing repo for `flysystem-gitlab` project', $res['contents']);
     }
     
     /**

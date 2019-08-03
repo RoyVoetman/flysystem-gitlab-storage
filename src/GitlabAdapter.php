@@ -225,12 +225,15 @@ class GitlabAdapter extends AbstractAdapter
     /**
      * @param  string  $path
      *
-     * @return string
+     * @return array|bool|false|mixed|string
      */
     public function read($path)
     {
         try {
-            return $this->client->readRaw($this->applyPathPrefix($path));
+            $res = $this->client->read($this->applyPathPrefix($path));
+            $res['contents'] = base64_decode($res['content']);
+            
+            return $res;
         } catch (GuzzleException $e) {
             return false;
         }
