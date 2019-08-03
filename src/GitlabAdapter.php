@@ -258,7 +258,13 @@ class GitlabAdapter extends AbstractAdapter
     public function listContents($directory = '', $recursive = false): array
     {
         try {
-            return $this->client->tree($this->applyPathPrefix($directory), $recursive);
+            $res = $this->client->tree($this->applyPathPrefix($directory), $recursive);
+    
+            return array_map(function($item) {
+                $item['type'] = ($item['type'] === 'blob') ? 'file' : $item['type'];
+                
+                return $item;
+            }, $res);
         } catch (GuzzleException $e) {
             return [];
         }

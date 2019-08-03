@@ -21,5 +21,8 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 ### 1.0.4 - 2019-08-03
 - Added support for tree path with multiple sub folders.
 
-### 1.0.5- 2019-08-03
+### 1.0.5 - 2019-08-03
 - Adapters read method now returns an array instead of raw content.
+
+### 1.0.6 - 2019-08-03
+- Adapters listContents method now changes type blob to type file.
