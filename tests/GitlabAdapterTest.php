@@ -242,9 +242,11 @@ class GitlabAdapterTest extends TestCase
      */
     public function it_can_delete_a_file()
     {
-        $res = $this->gitlabAdapter->delete('testing_renamed.md');
+        $res1 = $this->gitlabAdapter->delete('testing_renamed.md');
+        $res2 = $this->gitlabAdapter->delete('/testing.md');
         
-        $this->assertTrue($res);
+        $this->assertTrue($res1);
+        $this->assertTrue($res2);
     }
     
     /**
@@ -259,6 +261,90 @@ class GitlabAdapterTest extends TestCase
         $this->assertFalse($res);
         
         $this->restoreProjectId();
+    }
+    
+    /**
+     * @test
+     */
+    public function it_can_determine_if_a_project_has_a_file()
+    {
+        $res = $this->gitlabAdapter->has('/README.md');
+        
+        $this->assertTrue($res);
+    
+        $res = $this->gitlabAdapter->has('/I_DONT_EXIST.md');
+    
+        $this->assertFalse($res);
+    }
+    
+    /**
+     * @test
+     */
+    public function it_can_create_a_directory()
+    {
+        $res = $this->gitlabAdapter->createDir('/testing', new Config());
+
+        $this->assertTrue($res);
+
+        $res = $this->gitlabAdapter->has('/testing/.gitkeep');
+
+        $this->assertTrue($res);
+        
+       $this->gitlabAdapter->delete('/testing/.gitkeep');
+    }
+    
+    /**
+     * @test
+     */
+    public function it_can_delete_a_directory()
+    {
+        $this->gitlabAdapter->createDir('/testing', new Config());
+        
+        $res = $this->gitlabAdapter->deleteDir('/testing');
+    
+        $this->assertTrue($res);
+    
+        $res = $this->gitlabAdapter->has('/testing/.gitkeep');
+    
+        $this->assertFalse($res);
+    }
+    
+    /**
+     * @test
+     */
+    public function it_can_retrieve_a_list_of_contents_of_root()
+    {
+        $res = $this->gitlabAdapter->listContents();
+        
+        var_dump($res);
+        
+        $this->assertEquals(array_column($res, 'name'), [
+            'recursive', 'README.md'
+        ]);
+    }
+    
+    /**
+     * @test
+     */
+    public function it_can_retrieve_a_list_of_contents_of_root_recursive()
+    {
+        $res = $this->gitlabAdapter->listContents('/', true);
+        
+        $this->assertEquals(array_column($res, 'name'), [
+            'recursive', 'README.md', 'recursive.testing.md'
+        ]);
+    }
+    
+    /**
+     * @test
+     */
+    public function it_can_retrieve_a_list_of_contents_of_sub_folder()
+    {
+        $res = $this->gitlabAdapter->listContents('/recursive');
+        
+        $this->assertEquals(array_column($res, 'name'), [
+            'recursive.testing.md'
+        ]);
     }
     
     /**

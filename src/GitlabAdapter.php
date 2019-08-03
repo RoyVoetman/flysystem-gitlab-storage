@@ -171,18 +171,24 @@ class GitlabAdapter extends AbstractAdapter
     /**
      * @param  string  $dirname
      *
-     * @return bool|void
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return bool
      */
     public function deleteDir($dirname)
     {
-        $files = $this->client->tree($this->applyPathPrefix($dirname));
+        $files = $this->listContents($this->applyPathPrefix($dirname));
+        $status = true;
         
         foreach ($files as $file) {
             if ($file[ 'type' ] !== 'tree') {
-                $this->client->delete($file[ 'path' ], self::DELETED_FILE_COMMIT_MESSAGE);
+                try {
+                    $this->client->delete($file[ 'path' ], self::DELETED_FILE_COMMIT_MESSAGE);
+                } catch (GuzzleException $e) {
+                    $status = false;
+                }
             }
         }
+        
+        return $status;
     }
     
     /**
@@ -193,7 +199,11 @@ class GitlabAdapter extends AbstractAdapter
      */
     public function createDir($dirname, Config $config)
     {
-        throw new LogicException('Gitlab API v4 does not support creating directories.');
+        $path = rtrim($dirname, '/') . '/.gitkeep';
+    
+        $res = $this->write($this->applyPathPrefix($path), '', $config);
+    
+        return ($res !== false) ? true : false;
     }
     
     /**
@@ -240,12 +250,15 @@ class GitlabAdapter extends AbstractAdapter
      * @param  string  $directory
      * @param  bool  $recursive
      *
-     * @return array|mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return array
      */
     public function listContents($directory = '', $recursive = false): array
     {
-        return $this->client->tree($this->applyPathPrefix($directory), $recursive);
+        try {
+            return $this->client->tree($this->applyPathPrefix($directory), $recursive);
+        } catch (GuzzleException $e) {
+            return [];
+        }
     }
     
     /**
