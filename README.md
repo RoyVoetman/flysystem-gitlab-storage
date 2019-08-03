@@ -11,7 +11,7 @@ This package contains a Flysystem adapter for Gitlab. Under the hood, Gitlab's [
 ## Installation
 
 ```bash
-composer require superbalist/flysystem-google-storage
+composer require royvoetman/flysystem-gitlab-storage
 ```
 
 ## Integrations
