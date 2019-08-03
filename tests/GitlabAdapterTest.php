@@ -320,8 +320,6 @@ class GitlabAdapterTest extends TestCase
     {
         $res = $this->gitlabAdapter->listContents();
         
-        var_dump($res);
-        
         $this->assertEquals(array_column($res, 'name'), [
             'recursive', 'README.md'
         ]);
