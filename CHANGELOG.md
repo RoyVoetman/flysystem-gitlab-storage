@@ -17,3 +17,6 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 
 ### 1.0.3 - 2019-08-03
 - Fixing packagist versioning issue.
+
+### 1.0.4 - 2019-08-03
+- Added support for tree path with multiple sub folders.

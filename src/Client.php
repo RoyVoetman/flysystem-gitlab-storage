@@ -238,6 +238,10 @@ class Client
         
         $params = array_map('urlencode', $params);
         
+        if(isset($params['path'])) {
+            $params['path'] = urldecode($params['path']);
+        }
+        
         $params = http_build_query($params);
         
         $params = !empty($params) ? "?$params" : null;
