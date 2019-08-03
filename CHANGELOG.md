@@ -11,3 +11,6 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 
 ### 1.0.1 - 2019-08-03
 - Updated CHANGELOG
+
+### 1.0.2 - 2019-08-03
+- Updated composer.json to support laravel projects

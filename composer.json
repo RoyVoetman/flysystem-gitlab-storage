@@ -38,13 +38,6 @@
             "RoyVoetman\\FlysystemGitlab\\Tests\\": "tests"
         }
     },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "RoyVoetman\\FlysystemGitlab\\Providers\\GitlabServiceProvider"
-            ]
-        }
-    },
     "config": {
         "sort-packages": true
     }
