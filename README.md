@@ -2,7 +2,7 @@
 
 A Gitlab Storage filesystem for [Flysystem](https://flysystem.thephpleague.com/docs/).
 
-[![Latest Version](https://img.shields.io/packagist/v/royvoetman/Flysystem-Gitlab-storage.svg?style=flat-square)](https://packagist.org/packages/royvoetman/Flysystem-Gitlab-storage)
+[![Latest Version](https://img.shields.io/packagist/v/royvoetman/flysystem-gitlab-storage.svg?style=flat-square)](https://packagist.org/packages/royvoetman/flysystem-gitlab-storage)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 [![Total Downloads](https://img.shields.io/packagist/dt/royvoetman/flysystem-gitlab-storage.svg?style=flat-square)](https://packagist.org/packages/royvoetman/flysystem-gitlab-storage)
 
