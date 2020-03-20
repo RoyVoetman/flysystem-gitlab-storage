@@ -26,3 +26,6 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 
 ### 1.0.6 - 2019-08-03
 - Adapters listContents method now changes type blob to type file.
+
+### 1.0.7 - 2020-03-20
+- Added a debug mode.

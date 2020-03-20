@@ -28,15 +28,22 @@ class GitlabAdapter extends AbstractAdapter
     protected $client;
     
     /**
+     * @var bool
+     */
+    protected $debug = false;
+    
+    /**
      * GitlabAdapter constructor.
      *
      * @param  \RoyVoetman\FlysystemGitlab\Client  $client
      * @param  string  $prefix
+     * @param  bool  $debug
      */
-    public function __construct(Client $client, $prefix = '')
+    public function __construct(Client $client, $prefix = '', $debug = false)
     {
         $this->client = $client;
         $this->setPathPrefix($prefix);
+        $this->debug = $debug;
     }
     
     /**
@@ -44,7 +51,8 @@ class GitlabAdapter extends AbstractAdapter
      * @param  string  $contents
      * @param  \League\Flysystem\Config  $config
      *
-     * @return array|bool|false
+     * @return array|bool|false|mixed|string
+     * @throws \Exception
      */
     public function write($path, $contents, Config $config)
     {
@@ -53,7 +61,7 @@ class GitlabAdapter extends AbstractAdapter
     
             return $this->client->read($this->applyPathPrefix($path));
         } catch (GuzzleException $e) {
-            return false;
+            return $this->failed($e);
         }
     }
     
@@ -63,6 +71,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  \League\Flysystem\Config  $config
      *
      * @return array|bool|false|mixed|string
+     * @throws \Exception
      */
     public function writeStream($path, $resource, Config $config)
     {
@@ -71,7 +80,7 @@ class GitlabAdapter extends AbstractAdapter
         
             return $this->client->read($this->applyPathPrefix($path));
         } catch (GuzzleException $e) {
-            return false;
+            return $this->failed($e);
         }
     }
     
@@ -81,6 +90,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  \League\Flysystem\Config  $config
      *
      * @return array|bool|false|mixed|string
+     * @throws \Exception
      */
     public function update($path, $contents, Config $config)
     {
@@ -89,7 +99,7 @@ class GitlabAdapter extends AbstractAdapter
         
             return $this->client->read($this->applyPathPrefix($path));
         } catch (GuzzleException $e) {
-            return false;
+            return $this->failed($e);
         }
     }
     
@@ -99,6 +109,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  \League\Flysystem\Config  $config
      *
      * @return array|bool|false|mixed|string
+     * @throws \Exception
      */
     public function updateStream($path, $resource, Config $config)
     {
@@ -108,7 +119,7 @@ class GitlabAdapter extends AbstractAdapter
         
             return $this->client->read($this->applyPathPrefix($path));
         } catch (GuzzleException $e) {
-            return false;
+            return $this->failed($e);
         }
     }
     
@@ -117,6 +128,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  string  $newPath
      *
      * @return bool
+     * @throws \Exception
      */
     public function rename($path, $newPath)
     {
@@ -129,7 +141,7 @@ class GitlabAdapter extends AbstractAdapter
         
             return true;
         } catch (GuzzleException $e) {
-            return false;
+            return $this->failed($e);
         }
     }
     
@@ -138,6 +150,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  string  $newPath
      *
      * @return bool
+     * @throws \Exception
      */
     public function copy($path, $newPath)
     {
@@ -148,7 +161,7 @@ class GitlabAdapter extends AbstractAdapter
         
             return true;
         } catch (GuzzleException $e) {
-            return false;
+            return $this->failed($e);
         }
     }
     
@@ -156,6 +169,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  string  $path
      *
      * @return bool
+     * @throws \Exception
      */
     public function delete($path)
     {
@@ -164,7 +178,7 @@ class GitlabAdapter extends AbstractAdapter
         
             return true;
         } catch (GuzzleException $e) {
-            return false;
+            return $this->failed($e);
         }
     }
     
@@ -172,6 +186,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  string  $dirname
      *
      * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function deleteDir($dirname)
     {
@@ -183,6 +198,10 @@ class GitlabAdapter extends AbstractAdapter
                 try {
                     $this->client->delete($file[ 'path' ], self::DELETED_FILE_COMMIT_MESSAGE);
                 } catch (GuzzleException $e) {
+                    if ($this->isDebugEnabled()) {
+                        throw $e;
+                    }
+    
                     $status = false;
                 }
             }
@@ -196,6 +215,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  \League\Flysystem\Config  $config
      *
      * @return array|false|void
+     * @throws \Exception
      */
     public function createDir($dirname, Config $config)
     {
@@ -210,13 +230,14 @@ class GitlabAdapter extends AbstractAdapter
      * @param  string  $path
      *
      * @return array|bool|null
+     * @throws \Exception
      */
     public function has($path)
     {
         try {
             $this->client->read($this->applyPathPrefix($path));
         } catch (GuzzleException $e) {
-            return false;
+            return $this->failed($e);
         }
         
         return true;
@@ -226,6 +247,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  string  $path
      *
      * @return array|bool|false|mixed|string
+     * @throws \Exception
      */
     public function read($path)
     {
@@ -235,7 +257,7 @@ class GitlabAdapter extends AbstractAdapter
             
             return $res;
         } catch (GuzzleException $e) {
-            return false;
+            return $this->failed($e);
         }
     }
     
@@ -254,6 +276,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  bool  $recursive
      *
      * @return array
+     * @throws \Exception
      */
     public function listContents($directory = '', $recursive = false): array
     {
@@ -266,7 +289,7 @@ class GitlabAdapter extends AbstractAdapter
                 return $item;
             }, $res);
         } catch (GuzzleException $e) {
-            return [];
+            return $this->failed($e, []);
         }
     }
     
@@ -274,13 +297,14 @@ class GitlabAdapter extends AbstractAdapter
      * @param  string  $path
      *
      * @return array|false
+     * @throws \Exception
      */
     public function getMetadata($path)
     {
         try {
             $metadata = $this->client->read($this->applyPathPrefix($path));
         } catch (GuzzleException $e) {
-            return false;
+            return $this->failed($e);
         }
     
         $metadata[ 'mimetype' ] = MimeType::detectByFilename($path);
@@ -292,6 +316,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  string  $path
      *
      * @return array|false
+     * @throws \Exception
      */
     public function getSize($path)
     {
@@ -302,6 +327,7 @@ class GitlabAdapter extends AbstractAdapter
      * @param  string  $path
      *
      * @return array|false
+     * @throws \Exception
      */
     public function getMimetype($path)
     {
@@ -319,6 +345,22 @@ class GitlabAdapter extends AbstractAdapter
     }
     
     /**
+     * @param  \Exception  $e
+     * @param  bool  $return
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function failed(\Exception $e, $return = false)
+    {
+        if ($this->isDebugEnabled()) {
+            throw $e;
+        }
+        
+        return $return;
+    }
+    
+    /**
      * @return \RoyVoetman\FlysystemGitlab\Client
      */
     public function getClient(): Client
@@ -332,5 +374,21 @@ class GitlabAdapter extends AbstractAdapter
     public function setClient(Client $client)
     {
         $this->client = $client;
+    }
+    
+    /**
+     * @return bool
+     */
+    public function isDebugEnabled(): bool
+    {
+        return $this->debug;
+    }
+    
+    /**
+     * @param  bool  $debug
+     */
+    public function setDebug(bool $debug)
+    {
+        $this->debug = $debug;
     }
 }
