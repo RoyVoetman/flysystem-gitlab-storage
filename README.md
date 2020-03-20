@@ -67,6 +67,21 @@ Every project in Gitlab has its own Project ID. It can be found at to top of the
 ### Base URL
 This will be the URL where you host your gitlab server (e.g. https://gitlab.com)
 
+## Debugging
+For the purpose of debugging does the adaptor have a build in `debug mode`. This is especially useful for debugging the authentication layer of the Gitlab API that is based purely on HTTP messages/ status codes.
+By default this mode is disabled, and this can be check by calling the `isDebugEnabled` method on the adapter.
+Enabling debugging mode can be done with either of the following two options:
+
+### Instantiation
+```php
+$adapter = new GitlabAdapter($client, '', true); // Third parameter defines debug mode
+```  
+
+### At run-time
+```php
+$adapter->setDebug(true);
+```  
+
 ## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
