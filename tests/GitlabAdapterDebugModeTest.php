@@ -68,12 +68,25 @@ class GitlabAdapterDebugModeTest extends TestCase
     {
         $client = new Client('my-invalid-token', $this->config[ 'project-id' ], $this->config[ 'branch' ],
             $this->config[ 'base-url' ]);
-        
+    
         $adapter = new GitlabAdapter($client, '', true);
-        
+    
         $this->expectException(GuzzleException::class);
-        
+    
         $adapter->read('README.md');
+    }
+    
+    /**
+     * @test
+     */
+    public function it_does_not_throws_exception_in_production_mode()
+    {
+        $client = new Client('my-invalid-token', $this->config[ 'project-id' ], $this->config[ 'branch' ],
+            $this->config[ 'base-url' ]);
+        
+        $adapter = new GitlabAdapter($client, '');
+        
+        $this->assertFalse($adapter->read('README.md'));
     }
     
     /**
@@ -89,5 +102,9 @@ class GitlabAdapterDebugModeTest extends TestCase
         $this->expectException(GuzzleException::class);
         
         $adapter->listContents();
+        
+        $adapter->setDebug(false);
+        
+        $this->assertTrue($adapter->listContents() === []);
     }
 }
