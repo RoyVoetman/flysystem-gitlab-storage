@@ -77,7 +77,7 @@ Enabling debugging mode can be done with either of the following two options:
 $adapter = new GitlabAdapter($client, '', true); // Third parameter defines debug mode
 ```  
 
-### At run-time
+### At runtime
 ```php
 $adapter->setDebug(true);
 ```  
