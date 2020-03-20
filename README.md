@@ -68,9 +68,11 @@ Every project in Gitlab has its own Project ID. It can be found at to top of the
 This will be the URL where you host your gitlab server (e.g. https://gitlab.com)
 
 ## Debugging
-For the purpose of debugging does the adaptor have a build in `debug mode`. This is especially useful for debugging the authentication layer of the Gitlab API that is based purely on HTTP messages/ status codes.
-By default this mode is disabled, and this can be check by calling the `isDebugEnabled` method on the adapter.
-Enabling debugging mode can be done with either of the following two options:
+In some cases the need arises to debug the Http Messeages returned by the Gitlab API. For this need the adaptor has a built-in `debug mode`. When enabled this will tell the adaptor to prevent catching the `GuzzleHttp\Exception\GuzzleException`.
+
+By default this mode is disabled (this can be checked by calling the `isDebugEnabled` method on the adapter).
+
+Enabling debug mode can be done with either of the following two options:
 
 ### Instantiation
 ```php
