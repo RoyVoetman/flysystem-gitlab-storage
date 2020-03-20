@@ -70,9 +70,11 @@ This will be the URL where you host your gitlab server (e.g. https://gitlab.com)
 ## Debugging
 In some cases, the need arises to debug the Http Messeages returned by the Gitlab API. For this need, the adaptor has a built-in `debug mode`. When this mode is enabled, it will tell the adaptor to prevent catching the `GuzzleHttp\Exception\GuzzleException`.
 
-To check for the current state of de adaptor the `isDebugEnabled` method can be called on the adapter. Enabling debug mode can be done with either of the following two options:
+To check for the current state of de adaptor the `isDebugEnabled` method can be called on the adapter. 
 
-### Instantiation
+Enabling debug mode can be done with either of the following two options:
+
+### At instantiation
 ```php
 $adapter = new GitlabAdapter($client, '', true); // Third parameter defines debug mode
 ```  
