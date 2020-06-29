@@ -151,12 +151,20 @@ class Client
             $directory = null;
         }
         
-        $response = $this->request('GET', 'tree', [
-            'path'      => $directory,
-            'recursive' => $recursive
-        ]);
+        $page = 1;
+        
+        do {
+            $response = $this->request('GET', 'tree', [
+                'path'      => $directory,
+                'recursive' => $recursive,
+                'per_page'  => 100,
+                'page'      => $page++
+            ]);
     
-        return $this->responseContents($response);
+            $tree = array_merge($this->responseContents($response), $tree ?? []);
+        } while ($this->responseHasNextPage($response));
+    
+        return $tree;
     }
     
     /**
@@ -263,5 +271,19 @@ class Client
             ->getContents();
         
         return ($json) ? json_decode($contents, true) : $contents;
+    }
+    
+    /**
+     * @param  \GuzzleHttp\Psr7\Response  $response
+     *
+     * @return bool
+     */
+    private function responseHasNextPage(Response $response)
+    {
+        if ($response->hasHeader('X-Next-Page')) {
+            return !empty($response->getHeader('X-Next-Page')[0] ?? "");
+        }
+        
+        return false;
     }
 }

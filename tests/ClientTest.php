@@ -15,7 +15,7 @@ class ClientTest extends TestCase
     /**
      *
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         
@@ -130,7 +130,7 @@ class ClientTest extends TestCase
         $contents = $this->client->tree();
         
         $this->assertTrue(isset($contents[ 0 ]));
-        $this->assertTrue(count($contents) == 2);
+        $this->assertTrue(count($contents) == 5);
         $this->assertArrayHasKey('id', $contents[ 0 ]);
         $this->assertArrayHasKey('name', $contents[ 0 ]);
         $this->assertArrayHasKey('type', $contents[ 0 ]);
@@ -146,7 +146,7 @@ class ClientTest extends TestCase
         $contents = $this->client->tree('/', true);
         
         $this->assertTrue(isset($contents[ 0 ]));
-        $this->assertTrue(count($contents) == 3);
+        $this->assertTrue(count($contents) == 6);
     }
     
     /**

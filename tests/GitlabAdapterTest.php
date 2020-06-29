@@ -17,7 +17,7 @@ class GitlabAdapterTest extends TestCase
     /**
      *
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         
@@ -319,9 +319,9 @@ class GitlabAdapterTest extends TestCase
     public function it_can_retrieve_a_list_of_contents_of_root()
     {
         $res = $this->gitlabAdapter->listContents();
-        
-        $this->assertEquals(array_column($res, 'name'), [
-            'recursive', 'README.md'
+
+        $this->assertEqualsCanonicalizing(array_column($res, 'name'), [
+            'recursive', 'LICENSE', 'README.md', 'test', 'test2'
         ]);
     }
     
@@ -332,8 +332,8 @@ class GitlabAdapterTest extends TestCase
     {
         $res = $this->gitlabAdapter->listContents('/', true);
         
-        $this->assertEquals(array_column($res, 'name'), [
-            'recursive', 'README.md', 'recursive.testing.md'
+        $this->assertEqualsCanonicalizing(array_column($res, 'name'), [
+            'recursive', 'LICENSE', 'README.md', 'recursive.testing.md', 'test', 'test2'
         ]);
     }
     

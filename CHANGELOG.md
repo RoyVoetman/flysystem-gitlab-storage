@@ -29,3 +29,8 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 
 ### 1.0.7 - 2020-03-20
 - Added a debug mode.
+
+### 1.1.0 - 2020-06-29
+- Moved minimum PHP version to 7.1 since PHPUnit 9 requires 7.1 or above.
+- Added support for paginated list of contents when requesting file trees.
+- [https://docs.gitlab.com/ee/api/README.html#pagination](https://docs.gitlab.com/ee/api/README.html#pagination)

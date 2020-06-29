@@ -16,7 +16,7 @@ abstract class TestCase extends BaseTestCase
     /**
      *
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->config = require(__DIR__.'/config/config.testing.php');
     }
