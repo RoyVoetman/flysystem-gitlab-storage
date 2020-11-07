@@ -89,6 +89,7 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function write(string $path, string $contents, Config $config): void
     {
+        // TODO: first check if file exists and create or update the contents
         try {
             $this->client->upload(
                 $this->prefixer->prefixPath($path),
@@ -109,6 +110,7 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function writeStream(string $path, $contents, Config $config): void
     {
+        // TODO: first check if file exists and create or update the contents
         try {
             $this->client->uploadStream(
                 $this->prefixer->prefixPath($path),
@@ -270,6 +272,7 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function listContents(string $path, bool $deep): iterable
     {
+        // TODO: Add FileAttributes and DirectoryAttributes in the iterable
         try {
             $res = $this->client->tree($this->prefixer->prefixPath($path), $deep);
         
