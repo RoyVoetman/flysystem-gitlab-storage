@@ -140,13 +140,13 @@ class Client
     }
     
     /**
-     * @param  string  $directory
+     * @param  string|null  $directory
      * @param  bool  $recursive
      *
-     * @return mixed
+     * @return iterable
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function tree(string $directory = null, bool $recursive = false): array
+    public function tree(string $directory = null, bool $recursive = false): iterable
     {
         if ($directory === '/' || $directory === '') {
             $directory = null;
@@ -162,10 +162,8 @@ class Client
                 'page'      => $page++
             ]);
     
-            $tree = array_merge($this->responseContents($response), $tree ?? []);
+            yield $this->responseContents($response);
         } while ($this->responseHasNextPage($response));
-    
-        return $tree;
     }
     
     /**

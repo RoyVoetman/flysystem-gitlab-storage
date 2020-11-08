@@ -4,6 +4,7 @@ namespace RoyVoetman\FlysystemGitlab;
 
 use GuzzleHttp\Exception\ClientException;
 use League\Flysystem\Config;
+use League\Flysystem\DirectoryAttributes;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemException;
@@ -169,13 +170,13 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function deleteDirectory(string $path): void
     {
-        // TODO: update loop when list contents method is changed
         $files = $this->listContents($this->prefixer->prefixPath($path), false);
     
+        /** @var StorageAttributes $file */
         foreach ($files as $file) {
-            if ($file[ 'type' ] !== 'tree') {
+            if ($file->isFile()) {
                 try {
-                    $this->client->delete($file[ 'path' ], self::DELETED_FILE_COMMIT_MESSAGE);
+                    $this->client->delete($file->path(), self::DELETED_FILE_COMMIT_MESSAGE);
                 } catch (Throwable $e) {
                     throw UnableToDeleteDirectory::atLocation($path, $e->getMessage(), $e);
                 }
@@ -267,21 +268,27 @@ class GitlabAdapter implements FilesystemAdapter
      * @param string $path
      * @param bool   $deep
      *
-     * @return iterable<StorageAttributes>
-     *
      * @throws FilesystemException
+     * @return iterable<StorageAttributes>
      */
     public function listContents(string $path, bool $deep): iterable
     {
-        // TODO: Add FileAttributes and DirectoryAttributes in the iterable
         try {
-            $res = $this->client->tree($this->prefixer->prefixPath($path), $deep);
-        
-            return array_map(function($item) {
-                $item['type'] = ($item['type'] === 'blob') ? 'file' : $item['type'];
+            $tree = $this->client->tree($this->prefixer->prefixPath($path), $deep);
             
-                return $item;
-            }, $res);
+            foreach ($tree as $folders) {
+                foreach ($folders as $item) {
+                    $isDirectory = $item['type'] == 'tree';
+        
+                    yield $isDirectory ? new DirectoryAttributes($path, null, null) : new FileAttributes(
+                        $item['path'],
+                        $this->fileSize($item['path'])->fileSize(),
+                        null,
+                        $this->lastModified($item['path'])->lastModified(),
+                        $this->mimeTypeDetector->detectMimeTypeFromPath($item['path'])
+                    );
+                }
+            }
         } catch (Throwable $e) {
             throw new UnableToRetrieveFileTree($e->getMessage());
         }
