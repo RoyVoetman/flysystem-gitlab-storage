@@ -2,7 +2,7 @@
 
 namespace RoyVoetman\FlysystemGitlab;
 
-use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\ClientException;
 use League\Flysystem\Config;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemAdapter;
@@ -29,8 +29,7 @@ use Throwable;
  */
 class GitlabAdapter implements FilesystemAdapter
 {
-    const CREATED_FILE_COMMIT_MESSAGE = 'Uploaded file via Gitlab API';
-    const UPDATED_FILE_COMMIT_MESSAGE = 'Updated file via Gitlab API';
+    const UPLOADED_FILE_COMMIT_MESSAGE = 'Uploaded file via Gitlab API';
     const DELETED_FILE_COMMIT_MESSAGE = 'Deleted file via Gitlab API';
     
     /**
@@ -46,7 +45,7 @@ class GitlabAdapter implements FilesystemAdapter
     /**
      * @var \League\MimeTypeDetection\ExtensionMimeTypeDetector
      */
-    private ExtensionMimeTypeDetector $mimeTypeDetector;
+    protected ExtensionMimeTypeDetector $mimeTypeDetector;
     
     /**
      * GitlabAdapter constructor.
@@ -71,9 +70,11 @@ class GitlabAdapter implements FilesystemAdapter
     {
         try {
             $this->client->read($this->prefixer->prefixPath($path));
-        } catch (GuzzleException $e) {
-            return false;
         } catch (Throwable $e) {
+            if ($e instanceof ClientException && $e->getCode() == 404) {
+                return false;
+            }
+            
             throw UnableToCheckFileExistence::forLocation($path, $e);
         }
     
@@ -89,13 +90,12 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function write(string $path, string $contents, Config $config): void
     {
-        // TODO: first check if file exists and create or update the contents
+        $location = $this->prefixer->prefixPath($path);
+        
         try {
-            $this->client->upload(
-                $this->prefixer->prefixPath($path),
-                $contents,
-                self::CREATED_FILE_COMMIT_MESSAGE
-            );
+            $override = $this->fileExists($location);
+            
+            $this->client->upload($location, $contents, self::UPLOADED_FILE_COMMIT_MESSAGE, $override);
         } catch (Throwable $e) {
             throw UnableToWriteFile::atLocation($path, $e->getMessage(), $e);
         }
@@ -110,13 +110,12 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function writeStream(string $path, $contents, Config $config): void
     {
-        // TODO: first check if file exists and create or update the contents
+        $location = $this->prefixer->prefixPath($path);
+        
         try {
-            $this->client->uploadStream(
-                $this->prefixer->prefixPath($path),
-                $contents,
-                self::CREATED_FILE_COMMIT_MESSAGE
-            );
+            $override = $this->fileExists($location);
+            
+            $this->client->uploadStream($location, $contents, self::UPLOADED_FILE_COMMIT_MESSAGE, $override);
         } catch (Throwable $e) {
             throw UnableToWriteFile::atLocation($path, $e->getMessage(), $e);
         }
@@ -131,10 +130,9 @@ class GitlabAdapter implements FilesystemAdapter
     public function read(string $path): string
     {
         try {
-            $res = $this->client->read($this->prefixer->prefixPath($path));
-            $res['contents'] = base64_decode($res['content']);
-        
-            return $res;
+            $response = $this->client->read($this->prefixer->prefixPath($path));
+            
+            return base64_decode($response['content']);
         } catch (Throwable $e) {
             throw UnableToReadFile::fromLocation($path, $e->getMessage(), $e);
         }
@@ -171,6 +169,7 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function deleteDirectory(string $path): void
     {
+        // TODO: update loop when list contents method is changed
         $files = $this->listContents($this->prefixer->prefixPath($path), false);
     
         foreach ($files as $file) {
@@ -202,10 +201,10 @@ class GitlabAdapter implements FilesystemAdapter
     }
     
     /**
-     * @param mixed $visibility
+     * @param  string  $path
+     * @param  mixed  $visibility
      *
      * @throws \League\Flysystem\UnableToSetVisibility
-     * @throws FilesystemException
      */
     public function setVisibility(string $path, $visibility): void
     {
@@ -215,8 +214,8 @@ class GitlabAdapter implements FilesystemAdapter
     /**
      * @param  string  $path
      *
-     * @throws \League\Flysystem\UnableToSetVisibility
      * @return \League\Flysystem\FileAttributes
+     * @throws \League\Flysystem\UnableToSetVisibility
      */
     public function visibility(string $path): FileAttributes
     {
@@ -248,7 +247,8 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function lastModified(string $path): FileAttributes
     {
-        return new FileAttributes($path, null, null, 'TODO ADD LAST MODIFIED');
+        // TODO: ADD LAST MODIFIED
+        return new FileAttributes($path, null, null, null);
     }
     
     /**
@@ -259,7 +259,8 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function fileSize(string $path): FileAttributes
     {
-        return new FileAttributes($path, 'TODO ADD FILESIZE');
+        // TODO: ADD FILESIZE
+        return new FileAttributes($path, null);
     }
     
     /**
@@ -301,7 +302,7 @@ class GitlabAdapter implements FilesystemAdapter
             $this->client->upload(
                 $this->prefixer->prefixPath($destination),
                 $contents,
-                self::CREATED_FILE_COMMIT_MESSAGE
+                self::UPLOADED_FILE_COMMIT_MESSAGE
             );
         
             $this->client->delete($this->prefixer->prefixPath($source), self::DELETED_FILE_COMMIT_MESSAGE);
@@ -325,7 +326,7 @@ class GitlabAdapter implements FilesystemAdapter
             $this->client->upload(
                 $this->prefixer->prefixPath($destination),
                 $contents,
-                self::CREATED_FILE_COMMIT_MESSAGE
+                self::UPLOADED_FILE_COMMIT_MESSAGE
             );
         } catch (Throwable $e) {
             throw UnableToCopyFile::fromLocationTo($source, $destination, $e);

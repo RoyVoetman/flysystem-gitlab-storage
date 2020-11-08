@@ -4,6 +4,7 @@ namespace RoyVoetman\FlysystemGitlab;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Psr7\Response;
+use InvalidArgumentException;
 
 /**
  * Class GitlabAdapter
@@ -116,7 +117,7 @@ class Client
     public function uploadStream(string $path, $resource, string $commitMessage, $override = false): array
     {
         if (!is_resource($resource)) {
-            throw new \InvalidArgumentException(sprintf('Argument must be a valid resource type. %s given.',
+            throw new InvalidArgumentException(sprintf('Argument must be a valid resource type. %s given.',
                 gettype($resource)));
         }
     

@@ -3,16 +3,24 @@
 namespace RoyVoetman\FlysystemGitlab\Tests;
 
 use League\Flysystem\Config;
-use LogicException;
+use League\Flysystem\FileAttributes;
+use League\Flysystem\UnableToCheckFileExistence;
+use League\Flysystem\UnableToCopyFile;
+use League\Flysystem\UnableToDeleteFile;
+use League\Flysystem\UnableToMoveFile;
+use League\Flysystem\UnableToReadFile;
+use League\Flysystem\UnableToSetVisibility;
+use League\Flysystem\UnableToWriteFile;
 use RoyVoetman\FlysystemGitlab\Client;
 use RoyVoetman\FlysystemGitlab\GitlabAdapter;
+use RoyVoetman\FlysystemGitlab\UnableToCreateStream;
 
 class GitlabAdapterTest extends TestCase
 {
     /**
      * @var \RoyVoetman\FlysystemGitlab\GitlabAdapter
      */
-    protected $gitlabAdapter;
+    protected GitlabAdapter $gitlabAdapter;
     
     /**
      *
@@ -46,199 +54,63 @@ class GitlabAdapterTest extends TestCase
     public function it_can_set_client_instance()
     {
         $this->setInvalidProjectId();
-        
+
         $this->assertEquals($this->gitlabAdapter->getClient()
             ->getProjectId(), '123');
-        
-        $this->restoreProjectId();
     }
-    
+
     /**
      * @test
      */
-    public function it_can_write_a_file()
+    public function it_can_read_a_file()
     {
-        $metadata = $this->gitlabAdapter->write('testing.md', '# Testing create', new Config());
-        
-        $this->assertStringStartsWith(base64_encode('# Testing create'), $metadata[ 'content' ]);
+        $response = $this->gitlabAdapter->read('README.md');
+
+        $this->assertStringStartsWith('# Testing repo for `flysystem-gitlab` project', $response);
     }
-    
+
     /**
      * @test
      */
-    public function it_returns_false_when_write_failed()
+    public function it_throws_when_reading_a_file_into_a_stream()
     {
-        $this->setInvalidProjectId();
-        
-        $res = $this->gitlabAdapter->write('testing.md', '# Testing create', new Config());
-        
-        $this->assertFalse($res);
-        
-        $this->restoreProjectId();
+        $this->expectException(UnableToCreateStream::class);
+
+        $this->gitlabAdapter->readStream('README.md');
     }
-    
+
     /**
      * @test
      */
-    public function it_can_write_a_file_stream()
-    {
-        $stream = fopen(__DIR__.'/assets/testing.txt', 'r+');
-        
-        $metadata = $this->gitlabAdapter->writeStream('testing.txt', $stream, new Config());
-        
-        fclose($stream);
-        
-        $this->assertStringStartsWith(base64_encode('File for testing file streams'), $metadata[ 'content' ]);
-        $this->assertEquals($metadata[ 'file_name' ], 'testing.txt');
-        
-        // Clean up
-        $this->gitlabAdapter->delete('testing.txt');
-    }
-    
-    /**
-     * @test
-     */
-    public function it_returns_false_when_writing_file_stream_failed()
+    public function it_throws_when_read_failed()
     {
         $this->setInvalidProjectId();
-        
-        $stream = fopen(__DIR__.'/assets/testing.txt', 'r+');
-        
-        $res = $this->gitlabAdapter->writeStream('testing.txt', $stream, new Config());
-        
-        fclose($stream);
-        
-        $this->assertFalse($res);
-        
-        // Clean up
-        $this->restoreProjectId();
-    
-        $this->gitlabAdapter->delete('testing.txt');
+
+        $this->expectException(UnableToReadFile::class);
+
+        $this->gitlabAdapter->read('README.md');
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_determine_if_a_project_has_a_file()
+    {
+        $this->assertTrue($this->gitlabAdapter->fileExists('/README.md'));
+
+        $this->assertFalse($this->gitlabAdapter->fileExists('/I_DONT_EXIST.md'));
     }
     
     /**
      * @test
      */
-    public function it_can_update_a_file()
+    public function it_throws_when_file_existence_failed()
     {
-        $metadata = $this->gitlabAdapter->update('testing.md', '# Testing update', new Config());
+        $this->setInvalidToken();
         
-        $this->assertStringStartsWith(base64_encode('# Testing update'), $metadata[ 'content' ]);
-    }
-    
-    /**
-     * @test
-     */
-    public function it_returns_false_when_update_failed()
-    {
-        $this->setInvalidProjectId();
+        $this->expectException(UnableToCheckFileExistence::class);
         
-        $res = $this->gitlabAdapter->update('testing.md', '# Testing update', new Config());
-        
-        $this->assertFalse($res);
-        
-        $this->restoreProjectId();
-    }
-    
-    /**
-     * @test
-     */
-    public function it_can_update_a_file_stream()
-    {
-        $stream = fopen(__DIR__.'/assets/testing.txt', 'r+');
-        
-        $this->gitlabAdapter->writeStream('testing.txt', $stream, new Config());
-        
-        fclose($stream);
-        
-        $stream = fopen(__DIR__.'/assets/testing-update.txt', 'r+');
-        
-        $metadata = $this->gitlabAdapter->updateStream('testing.txt', $stream, new Config());
-        
-        fclose($stream);
-        
-        $this->assertStringStartsWith(base64_encode('File for testing file streams!'), $metadata[ 'content' ]);
-        $this->assertEquals($metadata[ 'file_name' ], 'testing.txt');
-        
-        // Clean up
-        $this->gitlabAdapter->delete('testing.txt');
-    }
-    
-    /**
-     * @test
-     */
-    public function it_returns_false_when_update_file_stream_failed()
-    {
-        $this->setInvalidProjectId();
-        
-        $stream = fopen(__DIR__.'/assets/testing.txt', 'r+');
-        
-        $res = $this->gitlabAdapter->updateStream('testing.txt', $stream, new Config());
-        
-        fclose($stream);
-        
-        $this->assertFalse($res);
-        
-        // Clean up
-        $this->restoreProjectId();
-        
-        $this->gitlabAdapter->delete('testing.txt');
-    }
-    
-    /**
-     * @test
-     */
-    public function it_can_rename_a_file()
-    {
-        $res = $this->gitlabAdapter->rename('testing.md', 'testing_renamed.md');
-        
-        $this->assertTrue($res);
-    
-        $res = $this->gitlabAdapter->has('testing_renamed.md');
-    
-        $this->assertTrue($res);
-    }
-    
-    /**
-     * @test
-     */
-    public function it_returns_false_when_rename_failed()
-    {
-        $this->setInvalidProjectId();
-        
-        $res = $this->gitlabAdapter->rename('testing.md', 'testing_renamed.md');
-        
-        $this->assertFalse($res);
-        
-        $this->restoreProjectId();
-    }
-    
-    /**
-     * @test
-     */
-    public function it_can_copy_a_file()
-    {
-        $res = $this->gitlabAdapter->copy('testing_renamed.md', 'testing.md');
-        
-        $this->assertTrue($res);
-    
-        $res = $this->gitlabAdapter->has('testing.md');
-    
-        $this->assertTrue($res);
-    }
-    
-    /**
-     * @test
-     */
-    public function it_returns_false_when_copy_failed()
-    {
-        $this->setInvalidProjectId();
-        
-        $res = $this->gitlabAdapter->copy('testing_renamed.md', 'testing.md');
-        
-        $this->assertFalse($res);
-        
-        $this->restoreProjectId();
+        $this->gitlabAdapter->fileExists('/README.md');
     }
     
     /**
@@ -246,11 +118,13 @@ class GitlabAdapterTest extends TestCase
      */
     public function it_can_delete_a_file()
     {
-        $res1 = $this->gitlabAdapter->delete('testing_renamed.md');
-        $res2 = $this->gitlabAdapter->delete('/testing.md');
+        $this->gitlabAdapter->write('testing.md', '# Testing create', new Config());
+    
+        $this->assertTrue($this->gitlabAdapter->fileExists('/testing.md'));
         
-        $this->assertTrue($res1);
-        $this->assertTrue($res2);
+        $this->gitlabAdapter->delete('/testing.md');
+        
+        $this->assertFalse($this->gitlabAdapter->fileExists('/testing.md'));
     }
     
     /**
@@ -260,210 +134,298 @@ class GitlabAdapterTest extends TestCase
     {
         $this->setInvalidProjectId();
         
-        $res = $this->gitlabAdapter->delete('testing_renamed.md');
+        $this->expectException(UnableToDeleteFile::class);
         
-        $this->assertFalse($res);
-        
-        $this->restoreProjectId();
+        $this->gitlabAdapter->delete('testing_renamed.md');
     }
     
     /**
      * @test
      */
-    public function it_can_determine_if_a_project_has_a_file()
+    public function it_can_write_a_new_file()
     {
-        $res = $this->gitlabAdapter->has('/README.md');
+        $this->gitlabAdapter->write('testing.md', '# Testing create', new Config());
+
+        $this->assertTrue($this->gitlabAdapter->fileExists('testing.md'));
+        $this->assertEquals($this->gitlabAdapter->read('testing.md'), '# Testing create');
         
-        $this->assertTrue($res);
-    
-        $res = $this->gitlabAdapter->has('/I_DONT_EXIST.md');
-    
-        $this->assertFalse($res);
+        $this->gitlabAdapter->delete('testing.md');
     }
     
+    /**
+     * @test
+     */
+    public function it_automatically_creates_missing_directories()
+    {
+        $this->gitlabAdapter->write('/folder/missing/testing.md', '# Testing create folders', new Config());
+        
+        $this->assertTrue($this->gitlabAdapter->fileExists('/folder/missing/testing.md'));
+        $this->assertEquals($this->gitlabAdapter->read('/folder/missing/testing.md'), '# Testing create folders');
+        
+        $this->gitlabAdapter->delete('/folder/missing/testing.md');
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_when_write_failed()
+    {
+        $this->setInvalidProjectId();
+
+        $this->expectException(UnableToWriteFile::class);
+
+        $this->gitlabAdapter->write('testing.md', '# Testing create', new Config());
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_write_a_file_stream()
+    {
+        $stream = fopen(__DIR__.'/assets/testing.txt', 'r+');
+        $this->gitlabAdapter->writeStream('testing.txt', $stream, new Config());
+        fclose($stream);
+
+        $this->assertTrue($this->gitlabAdapter->fileExists('testing.txt'));
+        $this->assertEquals($this->gitlabAdapter->read('testing.txt'), 'File for testing file streams');
+        
+        $this->gitlabAdapter->delete('testing.txt');
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_when_writing_file_stream_failed()
+    {
+        $this->setInvalidProjectId();
+
+        $this->expectException(UnableToWriteFile::class);
+
+        $stream = fopen(__DIR__.'/assets/testing.txt', 'r+');
+        $this->gitlabAdapter->writeStream('testing.txt', $stream, new Config());
+        fclose($stream);
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_override_a_file()
+    {
+        $this->gitlabAdapter->write('testing.md', '# Testing create', new Config());
+        $this->gitlabAdapter->write('testing.md', '# Testing update', new Config());
+
+        $this->assertStringStartsWith($this->gitlabAdapter->read('testing.md'), '# Testing update');
+        
+        $this->gitlabAdapter->delete('testing.md');
+    }
+    
+
+    /**
+     * @test
+     */
+    public function it_can_override_with_a_file_stream()
+    {
+        $stream = fopen(__DIR__.'/assets/testing.txt', 'r+');
+        $this->gitlabAdapter->writeStream('testing.txt', $stream, new Config());
+        fclose($stream);
+
+        $stream = fopen(__DIR__.'/assets/testing-update.txt', 'r+');
+        $this->gitlabAdapter->writeStream('testing.txt', $stream, new Config());
+        fclose($stream);
+        
+        $this->assertTrue($this->gitlabAdapter->fileExists('testing.txt'));
+        $this->assertEquals($this->gitlabAdapter->read('testing.txt'), 'File for testing file streams!');
+        
+        $this->gitlabAdapter->delete('testing.txt');
+    }
+    
+    /**
+     * @test
+     */
+    public function it_can_move_a_file()
+    {
+        $this->gitlabAdapter->write('testing.md', '# Testing move', new Config());
+        
+        $this->gitlabAdapter->move('testing.md', 'testing_move.md', new Config());
+        
+        $this->assertFalse($this->gitlabAdapter->fileExists('testing.md'));
+        $this->assertTrue($this->gitlabAdapter->fileExists('testing_move.md'));
+        
+        $this->assertEquals($this->gitlabAdapter->read('testing_move.md'), '# Testing move');
+        
+        $this->gitlabAdapter->delete('testing_move.md');
+    }
+    
+    /**
+     * @test
+     */
+    public function it_throws_when_move_failed()
+    {
+        $this->setInvalidProjectId();
+        
+        $this->expectException(UnableToMoveFile::class);
+        
+        $this->gitlabAdapter->move('testing_move.md', 'testing.md', new Config());
+    }
+    
+    /**
+     * @test
+     */
+    public function it_can_copy_a_file()
+    {
+        $this->gitlabAdapter->write('testing.md', '# Testing copy', new Config());
+        
+        $this->gitlabAdapter->copy('testing.md', 'testing_copy.md', new Config());
+
+        $this->assertTrue($this->gitlabAdapter->fileExists('testing.md'));
+        $this->assertTrue($this->gitlabAdapter->fileExists('testing_copy.md'));
+    
+        $this->assertEquals($this->gitlabAdapter->read('testing.md'), '# Testing copy');
+        $this->assertEquals($this->gitlabAdapter->read('testing_copy.md'), '# Testing copy');
+        
+        $this->gitlabAdapter->delete('testing.md');
+        $this->gitlabAdapter->delete('testing_copy.md');
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_when_copy_failed()
+    {
+        $this->setInvalidProjectId();
+
+        $this->expectException(UnableToCopyFile::class);
+        
+        $this->gitlabAdapter->copy('testing_copy.md', 'testing.md', new Config());
+    }
+
     /**
      * @test
      */
     public function it_can_create_a_directory()
     {
-        $res = $this->gitlabAdapter->createDir('/testing', new Config());
+        $this->gitlabAdapter->createDirectory('/testing', new Config());
+    
+        $this->assertTrue($this->gitlabAdapter->fileExists('/testing/.gitkeep'));
+    
+        $this->gitlabAdapter->delete('/testing/.gitkeep');
+    }
 
-        $this->assertTrue($res);
+//    /**
+//     * @test
+//     */
+//    public function it_can_retrieve_a_list_of_contents_of_root()
+//    {
+//        $list = $this->gitlabAdapter->listContents('/');
+//
+//        $this->assertEqualsCanonicalizing(array_column($list, 'name'), [
+//            'recursive', 'LICENSE', 'README.md', 'test', 'test2'
+//        ]);
+//    }
+//
+//    /**
+//     * @test
+//     */
+//    public function it_can_retrieve_a_list_of_contents_of_root_recursive()
+//    {
+//        $res = $this->gitlabAdapter->listContents('/', true);
+//
+//        $this->assertEqualsCanonicalizing(array_column($res, 'name'), [
+//            'recursive', 'LICENSE', 'README.md', 'recursive.testing.md', 'test', 'test2'
+//        ]);
+//    }
+//
+//    /**
+//     * @test
+//     */
+//    public function it_can_retrieve_a_list_of_contents_of_sub_folder()
+//    {
+//        $res = $this->gitlabAdapter->listContents('/recursive');
+//
+//        $this->assertEquals(array_column($res, 'name'), [
+//            'recursive.testing.md'
+//        ]);
+//    }
+//
 
-        $res = $this->gitlabAdapter->has('/testing/.gitkeep');
-
-        $this->assertTrue($res);
-        
-       $this->gitlabAdapter->delete('/testing/.gitkeep');
-    }
-    
-    /**
-     * @test
-     */
-    public function it_can_delete_a_directory()
-    {
-        $this->gitlabAdapter->createDir('/testing', new Config());
-        
-        $res = $this->gitlabAdapter->deleteDir('/testing');
-    
-        $this->assertTrue($res);
-    
-        $res = $this->gitlabAdapter->has('/testing/.gitkeep');
-    
-        $this->assertFalse($res);
-    }
-    
-    /**
-     * @test
-     */
-    public function it_can_retrieve_a_list_of_contents_of_root()
-    {
-        $res = $this->gitlabAdapter->listContents();
-
-        $this->assertEqualsCanonicalizing(array_column($res, 'name'), [
-            'recursive', 'LICENSE', 'README.md', 'test', 'test2'
-        ]);
-    }
-    
-    /**
-     * @test
-     */
-    public function it_can_retrieve_a_list_of_contents_of_root_recursive()
-    {
-        $res = $this->gitlabAdapter->listContents('/', true);
-        
-        $this->assertEqualsCanonicalizing(array_column($res, 'name'), [
-            'recursive', 'LICENSE', 'README.md', 'recursive.testing.md', 'test', 'test2'
-        ]);
-    }
-    
-    /**
-     * @test
-     */
-    public function it_can_retrieve_a_list_of_contents_of_sub_folder()
-    {
-        $res = $this->gitlabAdapter->listContents('/recursive');
-        
-        $this->assertEquals(array_column($res, 'name'), [
-            'recursive.testing.md'
-        ]);
-    }
-    
-    /**
-     * @test
-     */
-    public function it_can_read_a_file()
-    {
-        $res = $this->gitlabAdapter->read('README.md');
-        
-        $this->assertStringStartsWith('# Testing repo for `flysystem-gitlab` project', $res['contents']);
-    }
-    
-    /**
-     * @test
-     */
-    public function it_can_not_read_a_file_into_a_stream()
-    {
-        $this->expectException(LogicException::class);
-        
-        $this->gitlabAdapter->readStream('README.md');
-    }
-    
-    /**
-     * @test
-     */
-    public function it_returns_false_when_read_failed()
-    {
-        $this->setInvalidProjectId();
-        
-        $res = $this->gitlabAdapter->read('README.md');
-        
-        $this->assertFalse($res);
-        
-        $this->restoreProjectId();
-    }
-    
-    /**
-     * @test
-     */
-    public function it_can_retrieve_metadata()
-    {
-        $metadata = $this->gitlabAdapter->getMetadata('README.md');
-        
-        $this->assertArrayHasKey('file_name', $metadata);
-        $this->assertArrayHasKey('file_path', $metadata);
-        $this->assertArrayHasKey('size', $metadata);
-        $this->assertArrayHasKey('encoding', $metadata);
-        $this->assertArrayHasKey('content_sha256', $metadata);
-        $this->assertArrayHasKey('ref', $metadata);
-        $this->assertArrayHasKey('blob_id', $metadata);
-        $this->assertArrayHasKey('commit_id', $metadata);
-        $this->assertArrayHasKey('last_commit_id', $metadata);
-        $this->assertArrayHasKey('content', $metadata);
-        $this->assertArrayHasKey('mimetype', $metadata);
-    }
-    
-    /**
-     * @test
-     */
-    public function it_returns_false_when_retrieving_metadata_failed()
-    {
-        $this->setInvalidProjectId();
-        
-        $metadata = $this->gitlabAdapter->getMetadata('README.md');
-        
-        $this->assertFalse($metadata);
-        
-        $this->restoreProjectId();
-    }
+//    /**
+//     * @test
+//     */
+//    public function it_can_delete_a_directory()
+//    {
+//        $this->gitlabAdapter->createDirectory('/testing', new Config());
+//        $this->gitlabAdapter->write('/testing/testing.md', 'Testing delete directory', new Config());
+//
+//        $this->gitlabAdapter->deleteDirectory('/testing');
+//
+//        $this->assertFalse($this->gitlabAdapter->fileExists('/testing/.gitkeep'));
+//        $this->assertFalse($this->gitlabAdapter->fileExists('/testing/testing.md'));
+//    }
     
     /**
      * @test
      */
     public function it_can_retrieve_size()
     {
-        $metadata = $this->gitlabAdapter->getSize('README.md');
-        
-        $this->assertArrayHasKey('size', $metadata);
-    }
+        $size = $this->gitlabAdapter->fileSize('README.md');
     
+        $this->assertInstanceOf(FileAttributes::class, $size);
+        $this->assertEquals($size->fileSize(), null);
+    }
+
     /**
      * @test
      */
     public function it_can_retrieve_mimetype()
     {
-        $metadata = $this->gitlabAdapter->getMimetype('README.md');
-        
-        $this->assertArrayHasKey('mimetype', $metadata);
+        $metadata = $this->gitlabAdapter->mimeType('README.md');
+
+        $this->assertInstanceOf(FileAttributes::class, $metadata);
+        $this->assertEquals($metadata->mimeType(), 'text/markdown');
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_not_retrieve_lastModified()
+    {
+        $lastModified = $this->gitlabAdapter->lastModified('README.md');
+    
+        $this->assertInstanceOf(FileAttributes::class, $lastModified);
+        $this->assertEquals($lastModified->lastModified(), null);
     }
     
     /**
      * @test
      */
-    public function it_can_not_retrieve_timestamp()
+    public function it_throws_when_getting_visibility()
     {
-        $this->expectException(LogicException::class);
+        $this->expectException(UnableToSetVisibility::class);
         
-        $this->gitlabAdapter->getTimestamp('README.md');
+        $this->gitlabAdapter->visibility('README.md');
     }
     
     /**
-     *
+     * @test
      */
+    public function it_throws_when_setting_visibility()
+    {
+        $this->expectException(UnableToSetVisibility::class);
+        
+        $this->gitlabAdapter->setVisibility('README.md', 0777);
+    }
+    
+    private function setInvalidToken()
+    {
+        $client = $this->gitlabAdapter->getClient();
+        $client->setPersonalAccessToken('123');
+        $this->gitlabAdapter->setClient($client);
+    }
+    
     private function setInvalidProjectId()
     {
         $client = $this->gitlabAdapter->getClient();
         $client->setProjectId('123');
-        $this->gitlabAdapter->setClient($client);
-    }
-    
-    /**
-     *
-     */
-    private function restoreProjectId()
-    {
-        $client = $this->gitlabAdapter->getClient();
-        $client->setProjectId($this->config[ 'project-id' ]);
         $this->gitlabAdapter->setClient($client);
     }
 }
