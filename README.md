@@ -8,15 +8,13 @@ A Gitlab Storage filesystem for [Flysystem](https://flysystem.thephpleague.com/d
 
 This package contains a Flysystem adapter for Gitlab. Under the hood, Gitlab's [Repository (files) API](https://docs.gitlab.com/ee/api/repository_files.html) v4 is used.
 
+> Flysystem version 2 support still in development
+
 ## Installation
 
 ```bash
 composer require royvoetman/flysystem-gitlab-storage
 ```
-
-## Integrations
-
-* Laravel - https://github.com/royvoetman/laravel-gitlab-storage
 
 ## Usage
 ```php
@@ -28,30 +26,6 @@ $adapter = new GitlabAdapter($client));
 
 // Create FileSystem
 $filesystem = new Filesystem($adapter);
-
-// write a file
-$filesystem->write('path/to/file.txt', 'contents');
-
-// update a file
-$filesystem->update('path/to/file.txt', 'new contents');
-
-// read a file
-$contents = $filesystem->read('path/to/file.txt');
-
-// check if a file exists
-$exists = $filesystem->has('path/to/file.txt');
-
-// delete a file
-$filesystem->delete('path/to/file.txt');
-
-// rename a file
-$filesystem->rename('filename.txt', 'newname.txt');
-
-// copy a file
-$filesystem->copy('filename.txt', 'duplicate.txt');
-
-// delete a directory
-$filesystem->deleteDir('path/to/directory');
 
 // see http://flysystem.thephpleague.com/api/ for full list of available functionality
 ```
@@ -66,23 +40,6 @@ Every project in Gitlab has its own Project ID. It can be found at to top of the
 
 ### Base URL
 This will be the URL where you host your gitlab server (e.g. https://gitlab.com)
-
-## Debugging
-In some cases, the need arises to debug the Http Messeages returned by the Gitlab API. For this need, the adapter has a built-in `debug mode`. When this mode is enabled, it will tell the adapter to prevent catching the `GuzzleHttp\Exception\GuzzleException`.
-
-To check for the current state of de adaptor the `isDebugEnabled` method can be called on the adapter. 
-
-Enabling debug mode can be done with either of the following two options:
-
-### At instantiation
-```php
-$adapter = new GitlabAdapter($client, '', true); // Third parameter defines debug mode
-```  
-
-### At runtime
-```php
-$adapter->setDebug(true);
-```  
 
 ## Changelog
 
