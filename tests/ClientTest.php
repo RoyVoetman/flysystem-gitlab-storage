@@ -37,7 +37,7 @@ class ClientTest extends TestCase
     {
         $file = $this->client->read('README.md');
 
-        $this->assertStringStartsWith(base64_encode('# Testing repo for `flysystem-gitlab` project'),
+        $this->assertStringStartsWith(base64_encode('# Testing repo for `flysystem-gitlab`'),
             $file[ 'content' ]);
     }
 
@@ -48,7 +48,7 @@ class ClientTest extends TestCase
     {
         $content = $this->client->readRaw('README.md');
 
-        $this->assertStringStartsWith('# Testing repo for `flysystem-gitlab` project', $content);
+        $this->assertStringStartsWith('# Testing repo for `flysystem-gitlab`', $content);
     }
 
     /**
@@ -128,14 +128,15 @@ class ClientTest extends TestCase
     public function it_can_retrieve_a_file_tree()
     {
         $contents = $this->client->tree();
+    
+        $content = $contents->current();
 
-        $this->assertTrue(isset($contents[ 0 ]));
-        $this->assertTrue(count($contents) == 5);
-        $this->assertArrayHasKey('id', $contents[ 0 ]);
-        $this->assertArrayHasKey('name', $contents[ 0 ]);
-        $this->assertArrayHasKey('type', $contents[ 0 ]);
-        $this->assertArrayHasKey('path', $contents[ 0 ]);
-        $this->assertArrayHasKey('mode', $contents[ 0 ]);
+        $this->assertTrue(is_array($content));
+        $this->assertArrayHasKey('id', $content[0]);
+        $this->assertArrayHasKey('name', $content[0]);
+        $this->assertArrayHasKey('type', $content[0]);
+        $this->assertArrayHasKey('path', $content[0]);
+        $this->assertArrayHasKey('mode', $content[0]);
     }
 
     /**
@@ -144,9 +145,10 @@ class ClientTest extends TestCase
     public function it_can_retrieve_a_file_tree_recursive()
     {
         $contents = $this->client->tree('/', true);
+    
+        $content = $contents->current();
 
-        $this->assertTrue(isset($contents[ 0 ]));
-        $this->assertTrue(count($contents) == 6);
+        $this->assertTrue(is_array($content));
     }
 
     /**
@@ -155,14 +157,15 @@ class ClientTest extends TestCase
     public function it_can_retrieve_a_file_tree_of_a_subdirectory()
     {
         $contents = $this->client->tree('recursive', true);
+    
+        $content = $contents->current();
 
-        $this->assertTrue(isset($contents[ 0 ]));
-        $this->assertTrue(count($contents) == 1);
-        $this->assertArrayHasKey('id', $contents[ 0 ]);
-        $this->assertArrayHasKey('name', $contents[ 0 ]);
-        $this->assertArrayHasKey('type', $contents[ 0 ]);
-        $this->assertArrayHasKey('path', $contents[ 0 ]);
-        $this->assertArrayHasKey('mode', $contents[ 0 ]);
+        $this->assertTrue(is_array($content));
+        $this->assertArrayHasKey('id', $content[0]);
+        $this->assertArrayHasKey('name', $content[0]);
+        $this->assertArrayHasKey('type', $content[0]);
+        $this->assertArrayHasKey('path', $content[0]);
+        $this->assertArrayHasKey('mode', $content[0]);
     }
 
     /**

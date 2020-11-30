@@ -2,6 +2,7 @@
 
 namespace RoyVoetman\FlysystemGitlab;
 
+use DateTime;
 use GuzzleHttp\Exception\ClientException;
 use League\Flysystem\Config;
 use League\Flysystem\DirectoryAttributes;
@@ -248,8 +249,19 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function lastModified(string $path): FileAttributes
     {
-        // TODO: ADD LAST MODIFIED
-        return new FileAttributes($path, null, null, null);
+        try {
+            $response = $this->client->blame($this->prefixer->prefixPath($path));
+            
+            if (empty($response)) {
+                return new FileAttributes($path, null, null, null);
+            }
+            
+            $lastModified = DateTime::createFromFormat("Y-m-d\TH:i:s.uO", $response[0]['commit']['committed_date']);
+            
+            return new FileAttributes($path, null, null, $lastModified->getTimestamp());
+        } catch (Throwable $e) {
+            throw UnableToRetrieveMetadata::lastModified($path, $e->getMessage(), $e);
+        }
     }
     
     /**
@@ -260,8 +272,13 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function fileSize(string $path): FileAttributes
     {
-        // TODO: ADD FILESIZE
-        return new FileAttributes($path, null);
+        try {
+            $response = $this->client->read($this->prefixer->prefixPath($path));
+        
+            return new FileAttributes($path, $response['size']);
+        } catch (Throwable $e) {
+            throw UnableToRetrieveMetadata::fileSize($path, $e->getMessage(), $e);
+        }
     }
     
     /**
@@ -280,7 +297,7 @@ class GitlabAdapter implements FilesystemAdapter
                 foreach ($folders as $item) {
                     $isDirectory = $item['type'] == 'tree';
         
-                    yield $isDirectory ? new DirectoryAttributes($path, null, null) : new FileAttributes(
+                    yield $isDirectory ? new DirectoryAttributes($item['path'], null, null) : new FileAttributes(
                         $item['path'],
                         $this->fileSize($item['path'])->fileSize(),
                         null,

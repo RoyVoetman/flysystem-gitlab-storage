@@ -16,7 +16,7 @@ class Client
     const VERSION_URI = "/api/v4";
     
     /**
-     * @var string
+     * @var ?string
      */
     protected $personalAccessToken;
     
@@ -38,17 +38,17 @@ class Client
     /**
      * Client constructor.
      *
-     * @param  string  $personalAccessToken
      * @param  string  $projectId
      * @param  string  $branch
      * @param  string  $baseUrl
+     * @param  string|null  $personalAccessToken
      */
-    public function __construct(string $personalAccessToken, string $projectId, string $branch, string $baseUrl)
+    public function __construct(string $projectId, string $branch, string $baseUrl, ?string $personalAccessToken = null)
     {
-        $this->personalAccessToken = $personalAccessToken;
         $this->projectId = $projectId;
         $this->branch = $branch;
         $this->baseUrl = $baseUrl;
+        $this->personalAccessToken = $personalAccessToken;
     }
     
     /**
@@ -81,6 +81,20 @@ class Client
         return $this->responseContents($response);
     }
     
+    /**
+     * @param $path
+     *
+     * @return mixed|string
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function blame($path)
+    {
+        $path = urlencode($path);
+        
+        $response = $this->request('GET', "files/$path/blame");
+        
+        return $this->responseContents($response);
+    }
     
     /**
      * @param  string  $path

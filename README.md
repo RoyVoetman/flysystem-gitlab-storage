@@ -19,27 +19,32 @@ composer require royvoetman/flysystem-gitlab-storage
 ## Usage
 ```php
 // Create a Gitlab Client to talk with the API
-$client = new Client('personal-access-token', 'project-id', 'branch', 'base-url');
+$client = new Client('project-id', 'branch', 'base-url', 'personal-access-token');
    
-// Create the Adapter that implentents Flysystems AdapterInterface
-$adapter = new GitlabAdapter($client));
+// Create the Adapter that implements Flysystems AdapterInterface
+$adapter = new GitlabAdapter(
+    // Gitlab API Client
+    $client,
+    // Optional path prefix
+    'path/prefix',
+);
 
-// Create FileSystem
-$filesystem = new Filesystem($adapter);
+// The FilesystemOperator
+$filesystem = new League\Flysystem\Filesystem($adapter);
 
 // see http://flysystem.thephpleague.com/api/ for full list of available functionality
 ```
-
-### Access token (required for private projects)
-Gitlab supports server side API authentication with Personal Access tokens
-
-For more information on how to create your own Personal Access token: [Gitlab Docs](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
 
 ### Project ID
 Every project in Gitlab has its own Project ID. It can be found at to top of the frontpage of your repository. [See](https://stackoverflow.com/questions/39559689/where-do-i-find-the-project-id-for-the-gitlab-api#answer-53126068)
 
 ### Base URL
 This will be the URL where you host your gitlab server (e.g. https://gitlab.com)
+
+### Access token (required for private projects)
+Gitlab supports server side API authentication with Personal Access tokens
+
+For more information on how to create your own Personal Access token: [Gitlab Docs](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
 
 ## Changelog
 

@@ -26,8 +26,8 @@ abstract class TestCase extends BaseTestCase
      */
     protected function getClientInstance(): Client
     {
-        return new Client($this->config[ 'personal-access-token' ], $this->config[ 'project-id' ],
-            $this->config[ 'branch' ], $this->config[ 'base-url' ]);
+        return new Client($this->config[ 'project-id' ], $this->config[ 'branch' ], $this->config[ 'base-url' ],
+            $this->config[ 'personal-access-token' ]);
     }
     
     /**

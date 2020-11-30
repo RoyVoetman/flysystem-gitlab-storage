@@ -8,7 +8,6 @@ use League\Flysystem\FilesystemException;
 use League\Flysystem\StorageAttributes;
 use League\Flysystem\UnableToCheckFileExistence;
 use League\Flysystem\UnableToCopyFile;
-use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToMoveFile;
 use League\Flysystem\UnableToReadFile;
@@ -69,7 +68,7 @@ class GitlabAdapterTest extends TestCase
     {
         $response = $this->gitlabAdapter->read('README.md');
 
-        $this->assertStringStartsWith('# Testing repo for `flysystem-gitlab` project', $response);
+        $this->assertStringStartsWith('# Testing repo for `flysystem-gitlab`', $response);
     }
 
     /**
@@ -321,7 +320,7 @@ class GitlabAdapterTest extends TestCase
     {
         $list = $this->gitlabAdapter->listContents('/', false);
         $expectedPaths = [
-            ['type' => 'dir', 'path' => '/'],
+            ['type' => 'dir', 'path' => 'recursive'],
             ['type' => 'file', 'path' => 'LICENSE'],
             ['type' => 'file', 'path' => 'README.md'],
             ['type' => 'file', 'path' => 'test'],
@@ -343,7 +342,7 @@ class GitlabAdapterTest extends TestCase
     {
         $list = $this->gitlabAdapter->listContents('/', true);
         $expectedPaths = [
-            ['type' => 'dir', 'path' => '/'],
+            ['type' => 'dir', 'path' => 'recursive'],
             ['type' => 'file', 'path' => 'LICENSE'],
             ['type' => 'file', 'path' => 'README.md'],
             ['type' => 'file', 'path' => 'recursive/recursive.testing.md'],
@@ -411,7 +410,7 @@ class GitlabAdapterTest extends TestCase
         $size = $this->gitlabAdapter->fileSize('README.md');
 
         $this->assertInstanceOf(FileAttributes::class, $size);
-        $this->assertEquals($size->fileSize(), null);
+        $this->assertEquals($size->fileSize(), 37);
     }
 
     /**
@@ -433,7 +432,7 @@ class GitlabAdapterTest extends TestCase
         $lastModified = $this->gitlabAdapter->lastModified('README.md');
 
         $this->assertInstanceOf(FileAttributes::class, $lastModified);
-        $this->assertEquals($lastModified->lastModified(), null);
+        $this->assertEquals($lastModified->lastModified(), 1606750652);
     }
 
     /**
