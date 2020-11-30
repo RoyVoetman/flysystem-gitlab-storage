@@ -4,6 +4,7 @@ namespace RoyVoetman\FlysystemGitlab;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Psr7\Response;
+use InvalidArgumentException;
 
 /**
  * Class GitlabAdapter
@@ -15,7 +16,7 @@ class Client
     const VERSION_URI = "/api/v4";
     
     /**
-     * @var string
+     * @var ?string
      */
     protected $personalAccessToken;
     
@@ -37,17 +38,17 @@ class Client
     /**
      * Client constructor.
      *
-     * @param  string  $personalAccessToken
      * @param  string  $projectId
      * @param  string  $branch
      * @param  string  $baseUrl
+     * @param  string|null  $personalAccessToken
      */
-    public function __construct(string $personalAccessToken, string $projectId, string $branch, string $baseUrl)
+    public function __construct(string $projectId, string $branch, string $baseUrl, ?string $personalAccessToken = null)
     {
-        $this->personalAccessToken = $personalAccessToken;
         $this->projectId = $projectId;
         $this->branch = $branch;
         $this->baseUrl = $baseUrl;
+        $this->personalAccessToken = $personalAccessToken;
     }
     
     /**
@@ -80,6 +81,20 @@ class Client
         return $this->responseContents($response);
     }
     
+    /**
+     * @param $path
+     *
+     * @return mixed|string
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function blame($path)
+    {
+        $path = urlencode($path);
+        
+        $response = $this->request('GET', "files/$path/blame");
+        
+        return $this->responseContents($response);
+    }
     
     /**
      * @param  string  $path
@@ -116,7 +131,7 @@ class Client
     public function uploadStream(string $path, $resource, string $commitMessage, $override = false): array
     {
         if (!is_resource($resource)) {
-            throw new \InvalidArgumentException(sprintf('Argument must be a valid resource type. %s given.',
+            throw new InvalidArgumentException(sprintf('Argument must be a valid resource type. %s given.',
                 gettype($resource)));
         }
     
@@ -139,13 +154,13 @@ class Client
     }
     
     /**
-     * @param  string  $directory
+     * @param  string|null  $directory
      * @param  bool  $recursive
      *
-     * @return mixed
+     * @return iterable
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function tree(string $directory = null, bool $recursive = false): array
+    public function tree(string $directory = null, bool $recursive = false): iterable
     {
         if ($directory === '/' || $directory === '') {
             $directory = null;
@@ -161,10 +176,8 @@ class Client
                 'page'      => $page++
             ]);
     
-            $tree = array_merge($this->responseContents($response), $tree ?? []);
+            yield $this->responseContents($response);
         } while ($this->responseHasNextPage($response));
-    
-        return $tree;
     }
     
     /**
