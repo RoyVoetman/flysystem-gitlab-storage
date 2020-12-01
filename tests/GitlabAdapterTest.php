@@ -15,7 +15,6 @@ use League\Flysystem\UnableToSetVisibility;
 use League\Flysystem\UnableToWriteFile;
 use RoyVoetman\FlysystemGitlab\Client;
 use RoyVoetman\FlysystemGitlab\GitlabAdapter;
-use RoyVoetman\FlysystemGitlab\UnableToCreateStream;
 
 class GitlabAdapterTest extends TestCase
 {
@@ -74,11 +73,12 @@ class GitlabAdapterTest extends TestCase
     /**
      * @test
      */
-    public function it_throws_when_reading_a_file_into_a_stream()
+    public function it_can_read_a_file_into_a_stream()
     {
-        $this->expectException(UnableToCreateStream::class);
+        $stream = $this->gitlabAdapter->readStream('README.md');
 
-        $this->gitlabAdapter->readStream('README.md');
+        $this->assertIsResource($stream);
+        $this->assertEquals(stream_get_contents($stream, null, 0), $this->gitlabAdapter->read('README.md'));
     }
 
     /**
