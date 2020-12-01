@@ -37,3 +37,6 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 
 ### 2.0.0 - 2020-11-30
 - Migrated to flysystem 2.x
+
+### 2.0.1 - 2020-12-01
+- Added php 8 support
