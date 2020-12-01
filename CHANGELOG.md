@@ -40,3 +40,6 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 
 ### 2.0.1 - 2020-12-01
 - Added php 8 support
+
+### 2.0.2 - 2020-12-01
+- Allow to read into stream
