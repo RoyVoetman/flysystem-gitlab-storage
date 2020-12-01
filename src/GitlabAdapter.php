@@ -147,7 +147,17 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function readStream(string $path)
     {
-        throw new UnableToCreateStream(get_class($this).' Gitlab API does not support reading a file into a stream.');
+        if (false === ($fp = fopen('php://memory', 'r+'))) {
+            throw UnableToReadFile::fromLocation($path, 'Unable to open memory stream');
+        }
+
+        if (false === fwrite($fp, $this->read($path))) {
+            throw UnableToReadFile::fromLocation($path, 'Unable to write stream');
+        }
+
+        fseek($fp, 0);
+
+        return $fp;
     }
     
     /**
