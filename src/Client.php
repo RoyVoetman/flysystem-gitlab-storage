@@ -5,6 +5,7 @@ namespace RoyVoetman\FlysystemGitlab;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * Class GitlabAdapter
@@ -79,6 +80,21 @@ class Client
         $response = $this->request('GET', "files/$path");
     
         return $this->responseContents($response);
+    }
+
+    /**
+     * @param $path
+     *
+     * @return resource|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function readStream($path)
+    {
+        $path = urlencode($path);
+
+        $response = $this->request('GET', "files/$path");
+
+        return $response->getBody()->detach();
     }
     
     /**

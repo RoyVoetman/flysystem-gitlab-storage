@@ -147,17 +147,15 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function readStream(string $path)
     {
-        if (false === ($fp = fopen('php://memory', 'r+'))) {
-            throw UnableToReadFile::fromLocation($path, 'Unable to open memory stream');
+        try {
+            if (null === ($resource = $this->client->readStream($this->prefixer->prefixPath($path)))) {
+                throw UnableToReadFile::fromLocation($path, 'Empty content');
+            }
+
+            return $resource;
+        } catch (Throwable $e) {
+            throw UnableToReadFile::fromLocation($path, $e->getMessage(), $e);
         }
-
-        if (false === fwrite($fp, $this->read($path))) {
-            throw UnableToReadFile::fromLocation($path, 'Unable to write stream');
-        }
-
-        fseek($fp, 0);
-
-        return $fp;
     }
     
     /**
