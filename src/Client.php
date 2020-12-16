@@ -81,9 +81,7 @@ class Client
         $headers = $response->getHeaders();
         $headers = array_filter(
             $headers,
-            function ($key) {
-                return substr($key, 0, 9) == 'X-Gitlab-';
-            },
+            fn($key) => substr($key, 0, 9) == 'X-Gitlab-',
             ARRAY_FILTER_USE_KEY
         );
 
@@ -97,9 +95,7 @@ class Client
                 $key = strtolower($key);
                 $key = preg_replace_callback(
                     '/[-_]+(.)?/i',
-                    function($matches) {
-                        return strtoupper($matches[1]);
-                    },
+                    fn($matches) => strtoupper($matches[ 1 ]),
                     $key
                 );
             }
