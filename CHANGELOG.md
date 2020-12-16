@@ -43,3 +43,6 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 
 ### 2.0.2 - 2020-12-01
 - Allow to read into stream
+
+### 2.0.3 - 2020-12-16
+-  Reuse stream of HTTP request instead of create new stream
