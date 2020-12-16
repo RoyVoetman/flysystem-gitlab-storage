@@ -132,9 +132,7 @@ class GitlabAdapter implements FilesystemAdapter
     public function read(string $path): string
     {
         try {
-            $response = $this->client->read($this->prefixer->prefixPath($path));
-            
-            return base64_decode($response['content']);
+            return $this->client->readRaw($this->prefixer->prefixPath($path));
         } catch (Throwable $e) {
             throw UnableToReadFile::fromLocation($path, $e->getMessage(), $e);
         }
@@ -281,9 +279,9 @@ class GitlabAdapter implements FilesystemAdapter
     public function fileSize(string $path): FileAttributes
     {
         try {
-            $response = $this->client->read($this->prefixer->prefixPath($path));
+            $meta = $this->client->read($this->prefixer->prefixPath($path));
         
-            return new FileAttributes($path, $response['size']);
+            return new FileAttributes($path, $meta['size'][0] ?? 0);
         } catch (Throwable $e) {
             throw UnableToRetrieveMetadata::fileSize($path, $e->getMessage(), $e);
         }
