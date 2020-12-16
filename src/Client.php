@@ -92,7 +92,7 @@ class Client
     {
         $path = urlencode($path);
 
-        $response = $this->request('GET', "files/$path");
+        $response = $this->request('GET', "files/$path/raw");
 
         return $response->getBody()->detach();
     }

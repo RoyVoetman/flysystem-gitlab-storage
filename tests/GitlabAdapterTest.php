@@ -78,7 +78,7 @@ class GitlabAdapterTest extends TestCase
         $stream = $this->gitlabAdapter->readStream('README.md');
 
         $this->assertIsResource($stream);
-        $this->assertEquals(stream_get_contents($stream, null, 0), $this->gitlabAdapter->read('README.md'));
+        $this->assertEquals(stream_get_contents($stream, -1, 0), $this->gitlabAdapter->read('README.md'));
     }
 
     /**
