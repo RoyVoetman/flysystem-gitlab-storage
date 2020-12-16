@@ -50,30 +50,6 @@ class Client
         $this->baseUrl = $baseUrl;
         $this->personalAccessToken = $personalAccessToken;
     }
-
-    /**
-     * @param $path
-     *
-     * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function head($path)
-    {
-        $path = urlencode($path);
-
-        $response = $this->request('HEAD', "files/$path");
-
-        $headers = $response->getHeaders();
-        $headers = array_filter(
-            $headers,
-            function ($key) {
-                return substr($key, 0, 9) == 'X-Gitlab-';
-            },
-            ARRAY_FILTER_USE_KEY
-        );
-
-        return $headers;
-    }
     
     /**
      * @param $path
