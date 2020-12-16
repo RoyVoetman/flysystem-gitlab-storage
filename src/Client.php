@@ -50,6 +50,30 @@ class Client
         $this->baseUrl = $baseUrl;
         $this->personalAccessToken = $personalAccessToken;
     }
+
+    /**
+     * @param $path
+     *
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function head($path)
+    {
+        $path = urlencode($path);
+
+        $response = $this->request('HEAD', "files/$path");
+
+        $headers = $response->getHeaders();
+        $headers = array_filter(
+            $headers,
+            function ($key) {
+                return substr($key, 0, 9) == 'X-Gitlab-';
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+
+        return $headers;
+    }
     
     /**
      * @param $path
@@ -69,16 +93,43 @@ class Client
     /**
      * @param $path
      *
-     * @return mixed|string
+     * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function read($path)
     {
         $path = urlencode($path);
-    
-        $response = $this->request('GET', "files/$path");
-    
-        return $this->responseContents($response);
+
+        $response = $this->request('HEAD', "files/$path");
+
+        $headers = $response->getHeaders();
+        $headers = array_filter(
+            $headers,
+            function ($key) {
+                return substr($key, 0, 9) == 'X-Gitlab-';
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+
+        $keys = array_keys($headers);
+        $values = array_values($headers);
+
+        array_walk(
+            $keys,
+            function(&$key) {
+                $key = substr($key, 9);
+                $key = strtolower($key);
+                $key = preg_replace_callback(
+                    '/[-_]+(.)?/i',
+                    function($matches) {
+                        return strtoupper($matches[1]);
+                    },
+                    $key
+                );
+            }
+        );
+
+        return array_combine($keys, $values);
     }
     
     /**
@@ -238,12 +289,11 @@ class Client
      */
     private function request(string $method, string $uri, array $params = []): Response
     {
-        $uri = ($method === 'GET') ? $this->buildUri($uri, $params) : $this->buildUri($uri);
-    
-        $params = ($method !== 'GET') ? ['form_params' => array_merge(['branch' => $this->branch], $params)] : [];
-    
+        $uri = !in_array($method, ['POST', 'PUT', 'DELETE']) ? $this->buildUri($uri, $params) : $this->buildUri($uri);
+        $params = in_array($method, ['POST', 'PUT', 'DELETE']) ? ['form_params' => array_merge(['branch' => $this->branch], $params)] : [];
+
         $client = new HttpClient(['headers' => ['PRIVATE-TOKEN' => $this->personalAccessToken]]);
-    
+
         return $client->request($method, $uri, $params);
     }
     

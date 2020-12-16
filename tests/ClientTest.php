@@ -35,10 +35,11 @@ class ClientTest extends TestCase
      */
     public function it_can_read_a_file()
     {
-        $file = $this->client->read('README.md');
+        $meta = $this->client->read('README.md');
 
-        $this->assertStringStartsWith(base64_encode('# Testing repo for `flysystem-gitlab`'),
-            $file[ 'content' ]);
+        $this->assertArrayHasKey('ref', $meta);
+        $this->assertArrayHasKey('size', $meta);
+        $this->assertArrayHasKey('lastCommitId', $meta);
     }
 
     /**
