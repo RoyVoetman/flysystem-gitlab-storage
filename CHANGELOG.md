@@ -46,3 +46,6 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 
 ### 2.0.3 - 2020-12-16
 -  Reuse stream of HTTP request instead of create new stream
+
+### 2.0.4 - 2020-12-16
+- Savings HTTP exchanges with HEAD request
