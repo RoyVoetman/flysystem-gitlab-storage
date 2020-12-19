@@ -1,4 +1,4 @@
-# Flysystem Gitlab storage
+<img src="https://www.royvoetman.nl/images/packages/gitlab.svg" width="100%">
 
 A Gitlab Storage filesystem for [Flysystem](https://flysystem.thephpleague.com/docs/).
 
