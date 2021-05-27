@@ -8,6 +8,8 @@ A Gitlab Storage filesystem for [Flysystem](https://flysystem.thephpleague.com/d
 
 This package contains a Flysystem adapter for Gitlab. Under the hood, Gitlab's [Repository (files) API](https://docs.gitlab.com/ee/api/repository_files.html) v4 is used.
 
+> For Flysystem 1 & Laravel [use version 1.1.0](https://github.com/RoyVoetman/flysystem-gitlab-storage/tree/v1.1.0)
+
 ## Installation
 
 ```bash
