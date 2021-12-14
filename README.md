@@ -5,6 +5,7 @@ A Gitlab Storage filesystem for [Flysystem](https://flysystem.thephpleague.com/d
 [![Latest Version](https://img.shields.io/packagist/v/royvoetman/flysystem-gitlab-storage.svg?style=flat-square)](https://packagist.org/packages/royvoetman/flysystem-gitlab-storage)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 [![Total Downloads](https://img.shields.io/packagist/dt/royvoetman/flysystem-gitlab-storage.svg?style=flat-square)](https://packagist.org/packages/royvoetman/flysystem-gitlab-storage)
+[![BCH compliance](https://bettercodehub.com/edge/badge/RoyVoetman/flysystem-gitlab-storage?branch=master)](https://bettercodehub.com/)
 
 This package contains a Flysystem adapter for Gitlab. Under the hood, Gitlab's [Repository (files) API](https://docs.gitlab.com/ee/api/repository_files.html) v4 is used.
 
