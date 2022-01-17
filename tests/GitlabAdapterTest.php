@@ -454,6 +454,25 @@ class GitlabAdapterTest extends TestCase
 
         $this->gitlabAdapter->setVisibility('README.md', 0777);
     }
+
+    /**
+     * @test
+     */
+    public function it_can_check_directory_if_exists()
+    {
+        $dir = 'test-dir/test-dir2/test-dir3';
+        $this->gitlabAdapter->createDirectory($dir, new Config());
+        $this->assertTrue($this->gitlabAdapter->directoryExists($dir));
+        $this->gitlabAdapter->deleteDirectory($dir);
+    }
+
+    /**
+     * @test
+     */
+    public function it_cannot_check_if_directory_exists()
+    {
+        $this->assertFalse($this->gitlabAdapter->directoryExists('test_non_existent_dir'));
+    }
     
     private function setInvalidToken()
     {
