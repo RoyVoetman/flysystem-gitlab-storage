@@ -11,6 +11,7 @@ use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\PathPrefixer;
 use League\Flysystem\StorageAttributes;
+use League\Flysystem\UnableToCheckExistence;
 use League\Flysystem\UnableToCheckFileExistence;
 use League\Flysystem\UnableToCopyFile;
 use League\Flysystem\UnableToCreateDirectory;
@@ -377,5 +378,16 @@ class GitlabAdapter implements FilesystemAdapter
     public function setClient(Client $client)
     {
         $this->client = $client;
+    }
+
+    public function directoryExists(string $path): bool
+    {
+        try {
+            $tree = $this->client->tree($this->prefixer->prefixPath($path));
+
+            return (bool)count($tree->current());
+        } catch (Throwable $e) {
+            throw UnableToCheckExistence::forLocation($path, $e);
+        }
     }
 }
