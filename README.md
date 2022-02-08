@@ -10,13 +10,17 @@ This package contains a Flysystem adapter for Gitlab. Under the hood, Gitlab's [
 
 > For PHP 7.4 [use version 2.0.4](https://github.com/RoyVoetman/flysystem-gitlab-storage/tree/v2.0.4)
 
-> For Flysystem 1 & Laravel [use version 1.1.0](https://github.com/RoyVoetman/flysystem-gitlab-storage/tree/v1.1.0)
+> For Flysystem 1 [use version 1.1.0](https://github.com/RoyVoetman/flysystem-gitlab-storage/tree/v1.1.0)
 
 ## Installation
 
 ```bash
 composer require royvoetman/flysystem-gitlab-storage
 ```
+
+## Integrations
+
+* Laravel - [https://github.com/royvoetman/laravel-gitlab-storage](https://github.com/royvoetman/laravel-gitlab-storage)
 
 ## Usage
 ```php
