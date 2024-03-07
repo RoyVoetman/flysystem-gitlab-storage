@@ -13,45 +13,34 @@ use League\Flysystem\UnableToMoveFile;
 use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToSetVisibility;
 use League\Flysystem\UnableToWriteFile;
+use PHPUnit\Framework\Attributes\Test;
 use RoyVoetman\FlysystemGitlab\Client;
 use RoyVoetman\FlysystemGitlab\GitlabAdapter;
 
 class GitlabAdapterTest extends TestCase
 {
-    /**
-     * @var \RoyVoetman\FlysystemGitlab\GitlabAdapter
-     */
     protected GitlabAdapter $gitlabAdapter;
-    
-    /**
-     *
-     */
+
     public function setUp(): void
     {
         parent::setUp();
         
         $this->gitlabAdapter = $this->getAdapterInstance();
     }
-    
-    /**
-     * @test
-     */
+
+    #[Test]
     public function it_can_be_instantiated()
     {
         $this->assertInstanceOf(GitlabAdapter::class, $this->getAdapterInstance());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_retrieve_client_instance()
     {
         $this->assertInstanceOf(Client::class, $this->gitlabAdapter->getClient());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_set_client_instance()
     {
         $this->setInvalidProjectId();
@@ -60,9 +49,7 @@ class GitlabAdapterTest extends TestCase
             ->getProjectId(), '123');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_read_a_file()
     {
         $response = $this->gitlabAdapter->read('README.md');
@@ -70,9 +57,7 @@ class GitlabAdapterTest extends TestCase
         $this->assertStringStartsWith('# Testing repo for `flysystem-gitlab`', $response);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_read_a_file_into_a_stream()
     {
         $stream = $this->gitlabAdapter->readStream('README.md');
@@ -81,9 +66,7 @@ class GitlabAdapterTest extends TestCase
         $this->assertEquals(stream_get_contents($stream, -1, 0), $this->gitlabAdapter->read('README.md'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_throws_when_read_failed()
     {
         $this->setInvalidProjectId();
@@ -93,9 +76,7 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->read('README.md');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_determine_if_a_project_has_a_file()
     {
         $this->assertTrue($this->gitlabAdapter->fileExists('/README.md'));
@@ -103,9 +84,7 @@ class GitlabAdapterTest extends TestCase
         $this->assertFalse($this->gitlabAdapter->fileExists('/I_DONT_EXIST.md'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_throws_when_file_existence_failed()
     {
         $this->setInvalidToken();
@@ -115,9 +94,7 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->fileExists('/README.md');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_delete_a_file()
     {
         $this->gitlabAdapter->write('testing.md', '# Testing create', new Config());
@@ -129,9 +106,7 @@ class GitlabAdapterTest extends TestCase
         $this->assertFalse($this->gitlabAdapter->fileExists('/testing.md'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_returns_false_when_delete_failed()
     {
         $this->setInvalidProjectId();
@@ -141,35 +116,29 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->delete('testing_renamed.md');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_write_a_new_file()
     {
         $this->gitlabAdapter->write('testing.md', '# Testing create', new Config());
 
         $this->assertTrue($this->gitlabAdapter->fileExists('testing.md'));
-        $this->assertEquals($this->gitlabAdapter->read('testing.md'), '# Testing create');
+        $this->assertEquals('# Testing create', $this->gitlabAdapter->read('testing.md'));
 
         $this->gitlabAdapter->delete('testing.md');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_automatically_creates_missing_directories()
     {
         $this->gitlabAdapter->write('/folder/missing/testing.md', '# Testing create folders', new Config());
 
         $this->assertTrue($this->gitlabAdapter->fileExists('/folder/missing/testing.md'));
-        $this->assertEquals($this->gitlabAdapter->read('/folder/missing/testing.md'), '# Testing create folders');
+        $this->assertEquals('# Testing create folders', $this->gitlabAdapter->read('/folder/missing/testing.md'));
 
         $this->gitlabAdapter->delete('/folder/missing/testing.md');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_throws_when_write_failed()
     {
         $this->setInvalidProjectId();
@@ -179,9 +148,7 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->write('testing.md', '# Testing create', new Config());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_write_a_file_stream()
     {
         $stream = fopen(__DIR__.'/assets/testing.txt', 'r+');
@@ -189,14 +156,12 @@ class GitlabAdapterTest extends TestCase
         fclose($stream);
 
         $this->assertTrue($this->gitlabAdapter->fileExists('testing.txt'));
-        $this->assertEquals($this->gitlabAdapter->read('testing.txt'), 'File for testing file streams');
+        $this->assertEquals('File for testing file streams', $this->gitlabAdapter->read('testing.txt'));
 
         $this->gitlabAdapter->delete('testing.txt');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_throws_when_writing_file_stream_failed()
     {
         $this->setInvalidProjectId();
@@ -208,9 +173,7 @@ class GitlabAdapterTest extends TestCase
         fclose($stream);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_override_a_file()
     {
         $this->gitlabAdapter->write('testing.md', '# Testing create', new Config());
@@ -221,10 +184,7 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->delete('testing.md');
     }
 
-
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_override_with_a_file_stream()
     {
         $stream = fopen(__DIR__.'/assets/testing.txt', 'r+');
@@ -236,14 +196,12 @@ class GitlabAdapterTest extends TestCase
         fclose($stream);
 
         $this->assertTrue($this->gitlabAdapter->fileExists('testing.txt'));
-        $this->assertEquals($this->gitlabAdapter->read('testing.txt'), 'File for testing file streams!');
+        $this->assertEquals('File for testing file streams!', $this->gitlabAdapter->read('testing.txt'));
 
         $this->gitlabAdapter->delete('testing.txt');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_move_a_file()
     {
         $this->gitlabAdapter->write('testing.md', '# Testing move', new Config());
@@ -253,14 +211,12 @@ class GitlabAdapterTest extends TestCase
         $this->assertFalse($this->gitlabAdapter->fileExists('testing.md'));
         $this->assertTrue($this->gitlabAdapter->fileExists('testing_move.md'));
 
-        $this->assertEquals($this->gitlabAdapter->read('testing_move.md'), '# Testing move');
+        $this->assertEquals('# Testing move', $this->gitlabAdapter->read('testing_move.md'));
 
         $this->gitlabAdapter->delete('testing_move.md');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_throws_when_move_failed()
     {
         $this->setInvalidProjectId();
@@ -270,9 +226,7 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->move('testing_move.md', 'testing.md', new Config());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_copy_a_file()
     {
         $this->gitlabAdapter->write('testing.md', '# Testing copy', new Config());
@@ -289,9 +243,7 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->delete('testing_copy.md');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_throws_when_copy_failed()
     {
         $this->setInvalidProjectId();
@@ -301,9 +253,7 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->copy('testing_copy.md', 'testing.md', new Config());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_create_a_directory()
     {
         $this->gitlabAdapter->createDirectory('/testing', new Config());
@@ -313,9 +263,7 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->delete('/testing/.gitkeep');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_retrieve_a_list_of_contents_of_root()
     {
         $list = $this->gitlabAdapter->listContents('/', false);
@@ -329,15 +277,13 @@ class GitlabAdapterTest extends TestCase
 
         foreach ($list as $item) {
             $this->assertInstanceOf(StorageAttributes::class, $item);
-            $this->assertTrue(
-                in_array(['type' => $item['type'], 'path' => $item['path']], $expectedPaths)
+            $this->assertContains(
+                ['type' => $item['type'], 'path' => $item['path']], $expectedPaths
             );
         }
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_retrieve_a_list_of_contents_of_root_recursive()
     {
         $list = $this->gitlabAdapter->listContents('/', true);
@@ -352,15 +298,13 @@ class GitlabAdapterTest extends TestCase
 
         foreach ($list as $item) {
             $this->assertInstanceOf(StorageAttributes::class, $item);
-            $this->assertTrue(
-                in_array(['type' => $item['type'], 'path' => $item['path']], $expectedPaths)
+            $this->assertContains(
+                ['type' => $item['type'], 'path' => $item['path']], $expectedPaths
             );
         }
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_retrieve_a_list_of_contents_of_sub_folder()
     {
         $list = $this->gitlabAdapter->listContents('/recursive', false);
@@ -370,15 +314,13 @@ class GitlabAdapterTest extends TestCase
 
         foreach ($list as $item) {
             $this->assertInstanceOf(StorageAttributes::class, $item);
-            $this->assertTrue(
-                in_array(['type' => $item['type'], 'path' => $item['path']], $expectedPaths)
+            $this->assertContains(
+                ['type' => $item['type'], 'path' => $item['path']], $expectedPaths
             );
         }
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_delete_a_directory()
     {
         $this->gitlabAdapter->createDirectory('/testing', new Config());
@@ -389,10 +331,8 @@ class GitlabAdapterTest extends TestCase
         $this->assertFalse($this->gitlabAdapter->fileExists('/testing/.gitkeep'));
         $this->assertFalse($this->gitlabAdapter->fileExists('/testing/testing.md'));
     }
-    
-    /**
-     * @test
-     */
+
+    #[Test]
     public function it_throws_when_delete_directory_failed()
     {
         $this->setInvalidProjectId();
@@ -401,43 +341,35 @@ class GitlabAdapterTest extends TestCase
         
         $this->gitlabAdapter->deleteDirectory('/testing');
     }
-    
-    /**
-     * @test
-     */
+
+    #[Test]
     public function it_can_retrieve_size()
     {
         $size = $this->gitlabAdapter->fileSize('README.md');
 
         $this->assertInstanceOf(FileAttributes::class, $size);
-        $this->assertEquals($size->fileSize(), 37);
+        $this->assertEquals(37, $size->fileSize());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_retrieve_mimetype()
     {
         $metadata = $this->gitlabAdapter->mimeType('README.md');
 
         $this->assertInstanceOf(FileAttributes::class, $metadata);
-        $this->assertEquals($metadata->mimeType(), 'text/markdown');
+        $this->assertEquals('text/markdown', $metadata->mimeType());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_not_retrieve_lastModified()
     {
         $lastModified = $this->gitlabAdapter->lastModified('README.md');
 
         $this->assertInstanceOf(FileAttributes::class, $lastModified);
-        $this->assertEquals($lastModified->lastModified(), 1606750652);
+        $this->assertEquals(1606750652, $lastModified->lastModified());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_throws_when_getting_visibility()
     {
         $this->expectException(UnableToSetVisibility::class);
@@ -445,9 +377,7 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->visibility('README.md');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_throws_when_setting_visibility()
     {
         $this->expectException(UnableToSetVisibility::class);
@@ -455,9 +385,7 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->setVisibility('README.md', 0777);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_check_directory_if_exists()
     {
         $dir = 'test-dir/test-dir2/test-dir3';
@@ -466,9 +394,7 @@ class GitlabAdapterTest extends TestCase
         $this->gitlabAdapter->deleteDirectory($dir);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_cannot_check_if_directory_exists()
     {
         $this->assertFalse($this->gitlabAdapter->directoryExists('test_non_existent_dir'));

@@ -15,7 +15,7 @@ use RuntimeException;
 final class UnableToRetrieveFileTree extends RuntimeException implements FilesystemOperationFailed
 {
     /**
-     * @return string
+     * @see FilesystemOperationFailed::operation()
      */
     public function operation(): string
     {

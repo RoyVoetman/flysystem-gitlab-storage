@@ -34,28 +34,13 @@ class GitlabAdapter implements FilesystemAdapter
 {
     const UPLOADED_FILE_COMMIT_MESSAGE = 'Uploaded file via Gitlab API';
     const DELETED_FILE_COMMIT_MESSAGE = 'Deleted file via Gitlab API';
-    
-    /**
-     * @var \RoyVoetman\FlysystemGitlab\Client
-     */
+
     protected Client $client;
-    
-    /**
-     * @var \League\Flysystem\PathPrefixer
-     */
+
     protected PathPrefixer $prefixer;
-    
-    /**
-     * @var \League\MimeTypeDetection\ExtensionMimeTypeDetector
-     */
+
     protected ExtensionMimeTypeDetector $mimeTypeDetector;
-    
-    /**
-     * GitlabAdapter constructor.
-     *
-     * @param  \RoyVoetman\FlysystemGitlab\Client  $client
-     * @param  string  $prefix
-     */
+
     public function __construct(Client $client, $prefix = '')
     {
         $this->client = $client;
@@ -64,10 +49,7 @@ class GitlabAdapter implements FilesystemAdapter
     }
     
     /**
-     * @param  string  $path
-     *
-     * @throws \League\Flysystem\UnableToCheckFileExistence
-     * @return bool
+     * @inheritdoc
      */
     public function fileExists(string $path): bool
     {
@@ -83,13 +65,9 @@ class GitlabAdapter implements FilesystemAdapter
     
         return true;
     }
-    
+
     /**
-     * @param  string  $path
-     * @param  string  $contents
-     * @param  \League\Flysystem\Config  $config
-     *
-     * @throws \League\Flysystem\UnableToWriteFile
+     * @inheritdoc
      */
     public function write(string $path, string $contents, Config $config): void
     {
@@ -103,13 +81,9 @@ class GitlabAdapter implements FilesystemAdapter
             throw UnableToWriteFile::atLocation($path, $e->getMessage(), $e);
         }
     }
-    
+
     /**
-     * @param  string  $path
-     * @param  resource  $contents
-     * @param  \League\Flysystem\Config  $config
-     *
-     * @throws UnableToWriteFile
+     * @inheritdoc
      */
     public function writeStream(string $path, $contents, Config $config): void
     {
@@ -123,12 +97,9 @@ class GitlabAdapter implements FilesystemAdapter
             throw UnableToWriteFile::atLocation($path, $e->getMessage(), $e);
         }
     }
-    
+
     /**
-     * @param  string  $path
-     *
-     * @throws \League\Flysystem\UnableToReadFile
-     * @return string
+     * @inheritdoc
      */
     public function read(string $path): string
     {
@@ -138,11 +109,9 @@ class GitlabAdapter implements FilesystemAdapter
             throw UnableToReadFile::fromLocation($path, $e->getMessage(), $e);
         }
     }
-    
+
     /**
-     * @param  string  $path
-     *
-     * @throws \League\Flysystem\UnableToReadFile
+     * @inheritdoc
      */
     public function readStream(string $path)
     {
@@ -156,11 +125,9 @@ class GitlabAdapter implements FilesystemAdapter
             throw UnableToReadFile::fromLocation($path, $e->getMessage(), $e);
         }
     }
-    
+
     /**
-     * @param  string  $path
-     *
-     * @throws \League\Flysystem\UnableToDeleteFile
+     * @inheritdoc
      */
     public function delete(string $path): void
     {
@@ -170,11 +137,9 @@ class GitlabAdapter implements FilesystemAdapter
             throw UnableToDeleteFile::atLocation($path, $e->getMessage(), $e);
         }
     }
-    
+
     /**
-     * @param  string  $path
-     *
-     * @throws \League\Flysystem\FilesystemException
+     * @inheritdoc
      */
     public function deleteDirectory(string $path): void
     {
@@ -191,12 +156,9 @@ class GitlabAdapter implements FilesystemAdapter
             }
         }
     }
-    
+
     /**
-     * @param  string  $path
-     * @param  \League\Flysystem\Config  $config
-     *
-     * @throws \League\Flysystem\UnableToCreateDirectory
+     * @inheritdoc
      */
     public function createDirectory(string $path, Config $config): void
     {
@@ -208,10 +170,9 @@ class GitlabAdapter implements FilesystemAdapter
             throw UnableToCreateDirectory::dueToFailure($path, $e);
         }
     }
-    
+
     /**
-     * @param  string  $path
-     * @param  mixed  $visibility
+     * @inheritdoc
      *
      * @throws \League\Flysystem\UnableToSetVisibility
      */
@@ -221,9 +182,8 @@ class GitlabAdapter implements FilesystemAdapter
     }
     
     /**
-     * @param  string  $path
+     * @inheritdoc
      *
-     * @return \League\Flysystem\FileAttributes
      * @throws \League\Flysystem\UnableToSetVisibility
      */
     public function visibility(string $path): FileAttributes
@@ -232,10 +192,9 @@ class GitlabAdapter implements FilesystemAdapter
     }
     
     /**
-     * @param  string  $path
+     * @inheritdoc
      *
      * @throws \League\Flysystem\UnableToRetrieveMetadata
-     * @return \League\Flysystem\FileAttributes
      */
     public function mimeType(string $path): FileAttributes
     {
@@ -249,10 +208,7 @@ class GitlabAdapter implements FilesystemAdapter
     }
     
     /**
-     * @param  string  $path
-     *
-     * @throws \League\Flysystem\UnableToRetrieveMetadata
-     * @return \League\Flysystem\FileAttributes
+     * @inheritdoc
      */
     public function lastModified(string $path): FileAttributes
     {
@@ -270,12 +226,9 @@ class GitlabAdapter implements FilesystemAdapter
             throw UnableToRetrieveMetadata::lastModified($path, $e->getMessage(), $e);
         }
     }
-    
+
     /**
-     * @param  string  $path
-     *
-     * @throws \League\Flysystem\UnableToRetrieveMetadata
-     * @return \League\Flysystem\FileAttributes
+     * @inheritdoc
      */
     public function fileSize(string $path): FileAttributes
     {
@@ -289,11 +242,7 @@ class GitlabAdapter implements FilesystemAdapter
     }
     
     /**
-     * @param string $path
-     * @param bool   $deep
-     *
-     * @throws FilesystemException
-     * @return iterable<StorageAttributes>
+     * @inheritdoc
      */
     public function listContents(string $path, bool $deep): iterable
     {
@@ -319,11 +268,7 @@ class GitlabAdapter implements FilesystemAdapter
     }
     
     /**
-     * @param  string  $source
-     * @param  string  $destination
-     * @param  \League\Flysystem\Config  $config
-     *
-     * @throws \League\Flysystem\UnableToMoveFile
+     * @inheritdoc
      */
     public function move(string $source, string $destination, Config $config): void
     {
@@ -343,11 +288,7 @@ class GitlabAdapter implements FilesystemAdapter
     }
     
     /**
-     * @param  string  $source
-     * @param  string  $destination
-     * @param  \League\Flysystem\Config  $config
-     *
-     * @throws \League\Flysystem\UnableToCopyFile
+     * @inheritdoc
      */
     public function copy(string $source, string $destination, Config $config): void
     {
@@ -363,23 +304,20 @@ class GitlabAdapter implements FilesystemAdapter
             throw UnableToCopyFile::fromLocationTo($source, $destination, $e);
         }
     }
-    
-    /**
-     * @return \RoyVoetman\FlysystemGitlab\Client
-     */
+
     public function getClient(): Client
     {
         return $this->client;
     }
-    
-    /**
-     * @param  \RoyVoetman\FlysystemGitlab\Client  $client
-     */
+
     public function setClient(Client $client)
     {
         $this->client = $client;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function directoryExists(string $path): bool
     {
         try {
