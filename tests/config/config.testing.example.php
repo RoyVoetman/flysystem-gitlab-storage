@@ -7,7 +7,7 @@ return [
     | Flysystem Adapter for Gitlab configurations
     |--------------------------------------------------------------------------
     |
-    | These configurations will be used in all the the tests to bootstrap
+    | These configurations will be used in all the tests to bootstrap
     | a Client object.
     |
     */
