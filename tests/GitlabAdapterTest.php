@@ -289,9 +289,12 @@ class GitlabAdapterTest extends TestCase
         $list = $this->gitlabAdapter->listContents('/', true);
         $expectedPaths = [
             ['type' => 'dir', 'path' => 'recursive'],
+            ['type' => 'dir', 'path' => 'recursive/level-1'],
+            ['type' => 'dir', 'path' => 'recursive/level-1/level-2'],
             ['type' => 'file', 'path' => 'LICENSE'],
             ['type' => 'file', 'path' => 'README.md'],
             ['type' => 'file', 'path' => 'recursive/recursive.testing.md'],
+            ['type' => 'file', 'path' => 'recursive/level-1/level-2/.gitkeep'],
             ['type' => 'file', 'path' => 'test'],
             ['type' => 'file', 'path' => 'test2'],
         ];
@@ -309,7 +312,26 @@ class GitlabAdapterTest extends TestCase
     {
         $list = $this->gitlabAdapter->listContents('/recursive', false);
         $expectedPaths = [
-            ['type' => 'file', 'path' => 'recursive/recursive.testing.md']
+            ['type' => 'dir', 'path' => 'recursive/level-1'],
+            ['type' => 'dir', 'path' => 'recursive/level-1/level-2'],
+            ['type' => 'file', 'path' => 'recursive/recursive.testing.md'],
+            ['type' => 'file', 'path' => 'recursive/level-1/level-2/.gitkeep'],
+        ];
+
+        foreach ($list as $item) {
+            $this->assertInstanceOf(StorageAttributes::class, $item);
+            $this->assertContains(
+                ['type' => $item['type'], 'path' => $item['path']], $expectedPaths
+            );
+        }
+    }
+
+    #[Test]
+    public function it_can_retrieve_a_list_of_contents_of_deep_sub_folder()
+    {
+        $list = $this->gitlabAdapter->listContents('/recursive/level-1/level-2', false);
+        $expectedPaths = [
+            ['type' => 'file', 'path' => 'recursive/level-1/level-2/.gitkeep'],
         ];
 
         foreach ($list as $item) {

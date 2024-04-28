@@ -325,6 +325,10 @@ class GitlabAdapter implements FilesystemAdapter
 
             return (bool)count($tree->current());
         } catch (Throwable $e) {
+            if ($e instanceof ClientException && $e->getCode() == 404) {
+                return false;
+            }
+            
             throw UnableToCheckExistence::forLocation($path, $e);
         }
     }

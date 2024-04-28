@@ -82,7 +82,7 @@ class Client
         $headers = $response->getHeaders();
         $headers = array_filter(
             $headers,
-            fn($key) => substr($key, 0, 9) == 'X-Gitlab-',
+            fn($key) => substr($key, 0, 9) == 'x-gitlab-',
             ARRAY_FILTER_USE_KEY
         );
 
@@ -294,9 +294,11 @@ class Client
     private function buildUri(string $uri, array $params = []): string
     {
         $params = array_merge(['ref' => $this->branch], $params);
-        
-        $params = array_map('urlencode', $params);
-        
+
+        $params = array_map(function($value) {
+            return $value !== null ? urlencode($value) : null;
+        }, $params);
+                
         if(isset($params['path'])) {
             $params['path'] = urldecode($params['path']);
         }

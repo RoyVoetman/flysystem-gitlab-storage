@@ -50,5 +50,8 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 ### 2.0.4 - 2020-12-16
 - Savings HTTP exchanges with HEAD request
 
-### 2.xx - 2024-xx-xx
+### 3.0.0 - 2022-01-27
+- Added flysystem v3 support.
+
+### 3.1.0 - 2024-04-26
 - Moved minimum PHP version to 8.1
