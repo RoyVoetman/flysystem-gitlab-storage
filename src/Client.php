@@ -60,7 +60,7 @@ class Client
      */
     public function readRaw(string $path): string
     {
-        $path = urlencode($path);
+        $path = rawurlencode($path);
     
         $response = $this->request('GET', "files/$path/raw");
     
@@ -75,7 +75,7 @@ class Client
      */
     public function read($path)
     {
-        $path = urlencode($path);
+        $path = rawurlencode($path);
 
         $response = $this->request('HEAD', "files/$path");
 
@@ -113,7 +113,7 @@ class Client
      */
     public function readStream($path)
     {
-        $path = urlencode($path);
+        $path = rawurlencode($path);
 
         $response = $this->request('GET', "files/$path/raw");
 
@@ -128,7 +128,7 @@ class Client
      */
     public function blame($path)
     {
-        $path = urlencode($path);
+        $path = rawurlencode($path);
         
         $response = $this->request('GET', "files/$path/blame");
         
@@ -146,7 +146,7 @@ class Client
      */
     public function upload(string $path, string $contents, string $commitMessage, $override = false): array
     {
-        $path = urlencode($path);
+        $path = rawurlencode($path);
     
         $method = $override ? 'PUT' : 'POST';
     
@@ -185,7 +185,7 @@ class Client
      */
     public function delete(string $path, string $commitMessage)
     {
-        $path = urlencode($path);
+        $path = rawurlencode($path);
         
         $this->request('DELETE', "files/$path", [
             'commit_message' => $commitMessage
@@ -296,7 +296,7 @@ class Client
         $params = array_merge(['ref' => $this->branch], $params);
 
         $params = array_map(function($value) {
-            return $value !== null ? urlencode($value) : null;
+            return $value !== null ? rawurlencode($value) : null;
         }, $params);
                 
         if(isset($params['path'])) {
