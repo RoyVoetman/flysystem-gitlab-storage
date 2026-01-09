@@ -143,7 +143,7 @@ class GitlabAdapter implements FilesystemAdapter
      */
     public function deleteDirectory(string $path): void
     {
-        $files = $this->listContents($this->prefixer->prefixPath($path), false);
+        $files = $this->listContents($path, false);
     
         /** @var StorageAttributes $file */
         foreach ($files as $file) {
