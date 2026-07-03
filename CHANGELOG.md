@@ -55,6 +55,10 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 
 ### 3.1.0 - 2024-04-26
 - Moved minimum PHP version to 8.1
+  
+### 3.1.1 - 2025-06-11
+- With last API versions of GitLab, spaces replaced by "+" in paths are refused.
+So usage of urlencode() is prohibed, solution: replace use of urlencode() by rawurlencode()
 
-### 3.1.1 - 2026-07-03
+### 3.1.2 - 2026-07-03
 - Fix PHP 8.4+ implicit nullable deprecation in Client
