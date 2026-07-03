@@ -55,3 +55,6 @@ All notable changes to `flysystem-gitlab-storage` will be documented in this fil
 
 ### 3.1.0 - 2024-04-26
 - Moved minimum PHP version to 8.1
+
+### 3.1.1 - 2026-07-03
+- Fix PHP 8.4+ implicit nullable deprecation in Client
