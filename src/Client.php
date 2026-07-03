@@ -19,22 +19,22 @@ class Client
     /**
      * @var ?string
      */
-    protected $personalAccessToken;
+    protected ?string $personalAccessToken;
     
     /**
      * @var string
      */
-    protected $projectId;
+    protected string $projectId;
     
     /**
      * @var string
      */
-    protected $branch;
+    protected string $branch;
     
     /**
      * @var string
      */
-    protected $baseUrl;
+    protected string $baseUrl;
     
     /**
      * Client constructor.
@@ -51,9 +51,9 @@ class Client
         $this->baseUrl = $baseUrl;
         $this->personalAccessToken = $personalAccessToken;
     }
-    
+
     /**
-     * @param $path
+     * @param string $path
      *
      * @return string
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -68,12 +68,12 @@ class Client
     }
     
     /**
-     * @param $path
+     * @param string $path
      *
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function read($path)
+    public function read(string $path): array
     {
         $path = rawurlencode($path);
 
@@ -106,12 +106,12 @@ class Client
     }
 
     /**
-     * @param $path
+     * @param string $path
      *
      * @return resource|null
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function readStream($path)
+    public function readStream(string $path): mixed
     {
         $path = rawurlencode($path);
 
@@ -121,12 +121,12 @@ class Client
     }
     
     /**
-     * @param $path
+     * @param string $path
      *
      * @return mixed|string
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function blame($path)
+    public function blame(string $path): mixed
     {
         $path = rawurlencode($path);
         
@@ -144,7 +144,7 @@ class Client
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function upload(string $path, string $contents, string $commitMessage, $override = false): array
+    public function upload(string $path, string $contents, string $commitMessage, bool $override = false): array
     {
         $path = rawurlencode($path);
     
@@ -167,7 +167,7 @@ class Client
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function uploadStream(string $path, $resource, string $commitMessage, $override = false): array
+    public function uploadStream(string $path, $resource, string $commitMessage, bool $override = false): array
     {
         if (!is_resource($resource)) {
             throw new InvalidArgumentException(sprintf('Argument must be a valid resource type. %s given.',
@@ -199,7 +199,7 @@ class Client
      * @return iterable
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function tree(string $directory = null, bool $recursive = false): iterable
+    public function tree(?string $directory = null, bool $recursive = false): iterable
     {
         if ($directory === '/' || $directory === '') {
             $directory = null;
@@ -230,7 +230,7 @@ class Client
     /**
      * @param  string  $personalAccessToken
      */
-    public function setPersonalAccessToken(string $personalAccessToken)
+    public function setPersonalAccessToken(string $personalAccessToken): void
     {
         $this->personalAccessToken = $personalAccessToken;
     }
@@ -246,7 +246,7 @@ class Client
     /**
      * @param  string  $projectId
      */
-    public function setProjectId(string $projectId)
+    public function setProjectId(string $projectId): void
     {
         $this->projectId = $projectId;
     }
@@ -262,7 +262,7 @@ class Client
     /**
      * @param  string  $branch
      */
-    public function setBranch(string $branch)
+    public function setBranch(string $branch): void
     {
         $this->branch = $branch;
     }
@@ -287,7 +287,7 @@ class Client
     
     /**
      * @param  string  $uri
-     * @param $params
+     * @param  array  $params
      *
      * @return string
      */
@@ -318,7 +318,7 @@ class Client
      *
      * @return mixed|string
      */
-    private function responseContents(Response $response, $json = true)
+    private function responseContents(Response $response, bool $json = true): mixed
     {
         $contents = $response->getBody()
             ->getContents();
@@ -331,7 +331,7 @@ class Client
      *
      * @return bool
      */
-    private function responseHasNextPage(Response $response)
+    private function responseHasNextPage(Response $response): bool
     {
         if ($response->hasHeader('X-Next-Page')) {
             return !empty($response->getHeader('X-Next-Page')[0] ?? "");
